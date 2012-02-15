@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<teamcity-plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:noNamespaceSchemaLocation="urn:shemas-jetbrains-com:teamcity-plugin-v1-xml">
+  <info>
+    <name>wix-maven-3-teamcity-plugin</name>
+    <display-name>Wix Maven 3 Teamcity Plugin</display-name>
+    <version>${project.version}</version>
+    <description>What your plugin does?</description>
+
+    <vendor>
+      <name>Wix.com</name>
+      <url>http://enter.your.url.com</url>
+    </vendor>
+  </info>
+</teamcity-plugin>

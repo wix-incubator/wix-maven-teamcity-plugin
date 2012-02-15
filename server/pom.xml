@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.wixpress.ci.teamcity</groupId>
+        <artifactId>maven-teamcity-plugin</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>com.wixpress.ci.teamcity</groupId>
+    <artifactId>server</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <aetherVersion>1.13.1</aetherVersion>
+        <mavenVersion>3.0.4</mavenVersion>
+        <wagonVersion>1.0</wagonVersion>
+    </properties>
+
+
+    <dependencies>
+        <!-- TeamCity Libraries -->
+        <dependency>
+            <groupId>org.jetbrains.teamcity.agent</groupId>
+            <artifactId>common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.teamcity.agent</groupId>
+            <artifactId>runtime-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.teamcity.webapp</groupId>
+            <artifactId>annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.teamcity.webapp</groupId>
+            <artifactId>common-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.teamcity.webapp</groupId>
+            <artifactId>server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.teamcity.webapp</groupId>
+            <artifactId>server-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.teamcity.webapp</groupId>
+            <artifactId>spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.teamcity.webapp</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.teamcity.webapp</groupId>
+            <artifactId>util</artifactId>
+        </dependency>
+
+        <!-- Maven and aether libraries-->
+        <dependency>
+          <groupId>org.sonatype.aether</groupId>
+          <artifactId>aether-api</artifactId>
+          <version>${aetherVersion}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.aether</groupId>
+          <artifactId>aether-spi</artifactId>
+          <version>${aetherVersion}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.aether</groupId>
+          <artifactId>aether-util</artifactId>
+          <version>${aetherVersion}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.aether</groupId>
+          <artifactId>aether-impl</artifactId>
+          <version>${aetherVersion}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.aether</groupId>
+          <artifactId>aether-connector-file</artifactId>
+          <version>${aetherVersion}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.aether</groupId>
+          <artifactId>aether-connector-wagon</artifactId>
+          <version>${aetherVersion}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.maven</groupId>
+          <artifactId>maven-aether-provider</artifactId>
+          <version>${mavenVersion}</version>
+          <exclusions>
+            <exclusion>
+              <groupId>org.sonatype.aether</groupId>
+              <artifactId>aether-impl</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>org.sonatype.aether</groupId>
+              <artifactId>aether-spi</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>org.sonatype.aether</groupId>
+              <artifactId>aether-util</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>org.sonatype.aether</groupId>
+              <artifactId>aether-api</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.maven.wagon</groupId>
+          <artifactId>wagon-provider-api</artifactId>
+          <version>${wagonVersion}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.maven</groupId>
+          <artifactId>wagon-ahc</artifactId>
+          <version>1.2.1</version>
+        </dependency>
+        <dependency>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-utils</artifactId>
+          <version>2.1</version>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.sisu</groupId>
+          <artifactId>sisu-inject-plexus</artifactId>
+          <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-core</artifactId>
+            <version>3.0.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <version>1.1</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+</project>
