@@ -11,11 +11,11 @@ import java.io.File;
  */
 public class FSWorkspaceFile implements WorkspaceFile {
     private final File file;
-    private WorkspaceDir parent;
+    private FSWorkspaceDir parent;
 
     FSWorkspaceFile(WorkspaceDir dir, String fileName) {
         file = new File(((FSWorkspaceDir)dir).getDir(), fileName);
-        parent = dir;
+        parent = (FSWorkspaceDir)dir;
     }
 
     public boolean exists() {
@@ -33,9 +33,13 @@ public class FSWorkspaceFile implements WorkspaceFile {
     @Override
     public String toString() {
         return new StringBuilder()
-                .append("FSWorkspaceFile(")
+                .append("WorkspaceFile(")
                 .append(file.getAbsoluteFile())
                 .append(')')
                 .toString();
+    }
+
+    public String getRelativePath() {
+        return parent.getRelativePath().append(file.getName()).toString();
     }
 }
