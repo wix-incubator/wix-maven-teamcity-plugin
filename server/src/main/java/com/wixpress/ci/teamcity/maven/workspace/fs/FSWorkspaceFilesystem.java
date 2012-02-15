@@ -7,6 +7,8 @@ import com.wixpress.ci.teamcity.maven.workspace.WorkspaceFilesystem;
 import java.io.File;
 
 /**
+ * adapter interface to adapt {@link org.sonatype.aether.repository.WorkspaceReader} with {@link jetbrains.buildServer.serverSide.SBuildType}.
+ * {@link org.sonatype.aether.repository.WorkspaceReader} requires file on the filesystem
  * @author yoav
  * @since 2/15/12
  */
