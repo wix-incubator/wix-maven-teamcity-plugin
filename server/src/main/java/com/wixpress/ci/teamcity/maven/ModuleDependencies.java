@@ -32,4 +32,27 @@ public class ModuleDependencies {
     public List<ModuleDependencies> getChildModuleDependencieses() {
         return childModuleDependencieses;
     }
+    
+    public boolean accept(ModuleVisitor visitor) {
+        if ( visitor.visitEnter( this ) )
+        {
+            for ( ModuleDependencies child : getChildModuleDependencieses() )
+            {
+                if ( !child.accept( visitor ) )
+                {
+                    break;
+                }
+            }
+
+            for (DependencyNode dependencies: dependencyTree.getChildren())
+                dependencies.accept(visitor.getDependencyVisitor());
+        }
+
+        return visitor.visitLeave( this );
+
+    }
+    
+    public String toString() {
+        return String.format("module: %s:%s:%s", mavenModule.getGroupId(), mavenModule.getArtifactId(), mavenModule.getVersion());
+    }
 }

@@ -11,5 +11,10 @@
             <artifactId>commons-skin</artifactId>
             <version>3</version>
         </dependency>
+        <dependency>
+            <groupId>com.sonatype.example</groupId>
+            <artifactId>moduleA</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>

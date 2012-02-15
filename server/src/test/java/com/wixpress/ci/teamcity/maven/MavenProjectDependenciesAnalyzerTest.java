@@ -1,9 +1,6 @@
 package com.wixpress.ci.teamcity.maven;
 
-import com.wixpress.ci.teamcity.maven.listeners.ListenerLogger;
-import com.wixpress.ci.teamcity.maven.listeners.LoggingMavenWorkspaceListener;
-import com.wixpress.ci.teamcity.maven.listeners.LoggingRepositoryListener;
-import com.wixpress.ci.teamcity.maven.listeners.LoggingTransferListener;
+import com.wixpress.ci.teamcity.maven.listeners.*;
 import com.wixpress.ci.teamcity.maven.workspace.MavenWorkspaceReader;
 import com.wixpress.ci.teamcity.maven.workspace.MavenWorkspaceReaderException;
 import com.wixpress.ci.teamcity.maven.workspace.WorkspaceFilesystem;
@@ -64,6 +61,8 @@ public class MavenProjectDependenciesAnalyzerTest {
         assertThat(moduleDependencies.getDependencyTree(), IsDependencyNode("com.sonatype.example", "projA", "1.0.0-SNAPSHOT"));
         assertThat(moduleDependencies.getDependencyTree().getChildren(), hasItem(IsDependencyNode("org.apache.maven", "maven-model", "3.0.4")));
 
+
+        moduleDependencies.accept(new LoggingModuleVisitor(listenerLogger));
     } 
     
     @Test
@@ -81,5 +80,6 @@ public class MavenProjectDependenciesAnalyzerTest {
         assertThat(moduleDependencies.getMavenModule().getSubModules(), hasItem(IsMavenModule("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT")));
         assertThat(moduleDependencies.getMavenModule().getSubModules(), hasItem(IsMavenModule("com.sonatype.example", "moduleB", "1.0.0-SNAPSHOT")));
 
+        moduleDependencies.accept(new LoggingModuleVisitor(listenerLogger));
     }
 }
