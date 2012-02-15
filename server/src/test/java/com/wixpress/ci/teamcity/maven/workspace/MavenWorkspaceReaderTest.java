@@ -14,6 +14,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.wixpress.ci.teamcity.maven.Matchers.IsMavenModule;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
@@ -77,24 +78,4 @@ public class MavenWorkspaceReaderTest {
                 Matchers.<Object>is("com.sonatype.example:projB:pom:1.0.0-SNAPSHOT"));
     }
 
-    private Matcher<MavenModule> IsMavenModule(final String groupId, final String artifactId, final String version) {
-        return new TypeSafeMatcher<MavenModule>() {
-            @Override
-            public boolean matchesSafely(MavenModule mavenModule) {
-                return groupId.equals(mavenModule.getGroupId()) &&
-                        artifactId.equals(mavenModule.getArtifactId()) &&
-                        version.equals(mavenModule.getVersion());
-
-            }
-
-            public void describeTo(Description description) {
-                description.appendText("MavenModule(")
-                        .appendText(groupId)
-                        .appendText(":")
-                        .appendText(artifactId)
-                        .appendText(":")
-                        .appendText(version);
-            }
-        };
-    }
 }

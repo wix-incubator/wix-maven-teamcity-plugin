@@ -19,6 +19,7 @@ import org.sonatype.aether.util.artifact.DefaultArtifact;
 
 import java.io.*;
 
+import static com.wixpress.ci.teamcity.maven.Matchers.IsMavenModule;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
@@ -114,24 +115,4 @@ public class BuildTypeMavenWorkspaceReaderTest {
         workspaceFilesystem.close();
     }
 
-    private Matcher<MavenModule> IsMavenModule(final String groupId, final String artifactId, final String version) {
-        return new TypeSafeMatcher<MavenModule>() {
-            @Override
-            public boolean matchesSafely(MavenModule mavenModule) {
-                return groupId.equals(mavenModule.getGroupId()) &&
-                        artifactId.equals(mavenModule.getArtifactId()) &&
-                        version.equals(mavenModule.getVersion());
-
-            }
-
-            public void describeTo(Description description) {
-                description.appendText("MavenModule(")
-                        .appendText(groupId)
-                        .appendText(":")
-                        .appendText(artifactId)
-                        .appendText(":")
-                        .appendText(version);
-            }
-        };
-    }
 }
