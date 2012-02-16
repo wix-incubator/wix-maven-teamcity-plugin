@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 public class PageExtension extends SimplePageExtension {
 
     public PageExtension(PagePlaces pagePlaces) {
-        super(pagePlaces, PlaceId.ALL_PAGES_FOOTER, "teamcityPlugin", "input.jsp");
+        super(pagePlaces, PlaceId.ALL_PAGES_FOOTER, "wix-maven-3-teamcity-plugin", "input.jsp");
         register();
     }
 

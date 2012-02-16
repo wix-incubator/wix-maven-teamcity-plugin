@@ -2,5 +2,13 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans default-autowire="constructor">
-  <bean id="sampleExtension" class="com.wixpress.ci.teamcity.PageExtension"/>
+    <bean id="sampleExtension" class="com.wixpress.ci.teamcity.PageExtension"/>
+    <bean id="objectMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
+    <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesProgressController" init-method="register"/>
+    <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabExtension"/>
+
+    <bean class="com.wixpress.ci.teamcity.dependenciesTab.TeamCityProjectDependenciesAnalyzer" destroy-method="close">
+        <constructor-arg ref="mavenBooter"/>
+    </bean>
+    <bean id="mavenBooter" class="com.wixpress.ci.teamcity.maven.MavenBooter"/>
 </beans>

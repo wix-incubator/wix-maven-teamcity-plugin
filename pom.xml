@@ -48,6 +48,14 @@
           <skip>true</skip>
         </configuration>
       </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+                <target>1.5</target>
+                <source>1.5</source>
+            </configuration>
+        </plugin>
     </plugins>
   </build>
 

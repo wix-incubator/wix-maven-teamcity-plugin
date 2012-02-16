@@ -228,7 +228,10 @@ public class MavenBooter {
 
         public Singleton getSingleton(SingletonConstructorE<Singleton, E> singletonConstructor) throws E{
             if (singleton == null) {
-                singleton = singletonConstructor.create();
+                synchronized (this) {
+                    if (singleton == null)
+                        singleton = singletonConstructor.create();
+                }
             }
             return singleton;
         }
