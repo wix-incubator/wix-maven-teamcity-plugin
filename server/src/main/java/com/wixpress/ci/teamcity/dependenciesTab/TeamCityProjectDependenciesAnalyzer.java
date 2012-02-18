@@ -54,15 +54,6 @@ public class TeamCityProjectDependenciesAnalyzer {
         executorService.shutdown();
     }
 
-    private void purgeOldRuns() {
-        DateTime nowMinus5 = new DateTime().minusMinutes(5);
-        for (Map.Entry<String, CollectDependenciesRun> runningCollection: runningCollections.entrySet()) {
-            if (runningCollection.getValue().isCompleted() &&
-                    runningCollection.getValue().getCompletedTime().isBefore(nowMinus5))
-                runningCollections.remove(runningCollection.getKey());
-        }
-    }
-
     public CollectProgress getProgress(String id, Integer position) {
         CollectDependenciesRun run = runningCollections.get(id);
         if (run != null) {
@@ -71,6 +62,14 @@ public class TeamCityProjectDependenciesAnalyzer {
         return new CollectProgress(id);
     }
 
+    private void purgeOldRuns() {
+        DateTime nowMinus5 = new DateTime().minusMinutes(5);
+        for (Map.Entry<String, CollectDependenciesRun> runningCollection: runningCollections.entrySet()) {
+            if (runningCollection.getValue().isCompleted() &&
+                    runningCollection.getValue().getCompletedTime().isBefore(nowMinus5))
+                runningCollections.remove(runningCollection.getKey());
+        }
+    }
 
     private class CollectDependenciesRun implements Runnable {
 
