@@ -1,6 +1,6 @@
 package com.wixpress.ci.teamcity.dependenciesTab;
 
-import com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer;
+import com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import org.codehaus.jackson.map.ObjectMapper;
 

@@ -1,4 +1,4 @@
-package com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer;
+package com.wixpress.ci.teamcity.mavenAnalyzer;
 
 import com.wixpress.ci.teamcity.dependenciesTab.CollectingMessagesListenerLogger;
 import com.wixpress.ci.teamcity.domain.LogMessage;

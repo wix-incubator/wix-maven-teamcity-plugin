@@ -1,4 +1,4 @@
-package com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer;
+package com.wixpress.ci.teamcity.mavenAnalyzer;
 
 /**
 * @author yoav

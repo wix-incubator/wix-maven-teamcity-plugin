@@ -1,4 +1,4 @@
-package com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer;
+package com.wixpress.ci.teamcity.mavenAnalyzer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -11,7 +11,6 @@ import jetbrains.buildServer.serverSide.CustomDataStorage;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.vcs.VcsException;
 import jetbrains.buildServer.vcs.VcsRootInstance;
-import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import org.mockito.Matchers;
@@ -19,7 +18,7 @@ import org.mockito.Matchers;
 import java.io.IOException;
 import java.util.Map;
 
-import static com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer.ModuleStorage;
+import static com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer.ModuleStorage;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;

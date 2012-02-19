@@ -1,7 +1,7 @@
 package com.wixpress.ci.teamcity.dependenciesTab;
 
-import com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.DependenciesResult;
-import com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer;
+import com.wixpress.ci.teamcity.mavenAnalyzer.DependenciesResult;
+import com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer;
 import com.wixpress.ci.teamcity.domain.LogMessage;
 import com.wixpress.ci.teamcity.domain.LogMessageType;
 import jetbrains.buildServer.serverSide.ProjectManager;
