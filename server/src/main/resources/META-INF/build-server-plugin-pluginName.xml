@@ -2,13 +2,21 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans default-autowire="constructor">
-    <bean id="sampleExtension" class="com.wixpress.ci.teamcity.PageExtension"/>
-    <bean id="objectMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
+    <!-- the GUI -->
     <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesProgressController" init-method="register"/>
     <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabExtension"/>
-
+    <!-- the analyzers -->
+    <bean id="objectMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
+    <bean id="mavenBooter" class="com.wixpress.ci.teamcity.maven.MavenBooter"/>
+    <bean id="remoteRepositories" factory-bean="mavenBooter" factory-method="remoteRepositories"/>
+    <bean id="repositorySystem" factory-bean="mavenBooter" factory-method="repositorySystem"/>
+    <bean id="mavenProjectDependenciesAnalyzer" class="com.wixpress.ci.teamcity.maven.MavenProjectDependenciesAnalyzer">
+        <constructor-arg index="0" ref="remoteRepositories"/>
+        <constructor-arg index="1" ref="repositorySystem"/>
+    </bean>
     <bean class="com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer" destroy-method="close">
         <constructor-arg ref="mavenBooter"/>
+        <constructor-arg ref="objectMapper"/>
+        <constructor-arg ref="mavenProjectDependenciesAnalyzer"/>
     </bean>
-    <bean id="mavenBooter" class="com.wixpress.ci.teamcity.maven.MavenBooter"/>
 </beans>

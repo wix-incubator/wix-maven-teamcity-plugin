@@ -1,6 +1,12 @@
 package com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer;
 
+import com.wixpress.ci.teamcity.domain.LogMessage;
+import com.wixpress.ci.teamcity.domain.LogMessageType;
 import com.wixpress.ci.teamcity.domain.MModule;
+
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
 * @author yoav
@@ -9,7 +15,7 @@ import com.wixpress.ci.teamcity.domain.MModule;
 public class DependenciesResult {
     private ResultType resultType;
     private MModule module;
-    private Exception exception;
+    private List<LogMessage> fullTrace = newArrayList();
 
     public DependenciesResult(ResultType resultType) {
         this.resultType = resultType;
@@ -22,10 +28,16 @@ public class DependenciesResult {
 
     public DependenciesResult(Exception exception) {
         this.resultType = ResultType.exception;
-        this.exception = exception;
+        LogMessage logMessage = new LogMessage(exception.getMessage(), LogMessageType.error, exception);
+        fullTrace.add(logMessage);
     }
 
-    public DependenciesResult(ResultType needsRefresh, MModule module) {
+    public DependenciesResult(List<LogMessage> fullTrace) {
+        this.resultType = ResultType.exception;
+        this.fullTrace = fullTrace;
+    }
+
+    public DependenciesResult(ResultType resultType, MModule module) {
         this.resultType = resultType;
         this.module = module;
     }
@@ -38,7 +50,11 @@ public class DependenciesResult {
         return module;
     }
 
-    public Exception getException() {
-        return exception;
+    public List<LogMessage> getFullTrace() {
+        return fullTrace;
+    }
+
+    public void setFullTrace(List<LogMessage> fullTrace) {
+        this.fullTrace = fullTrace;
     }
 }

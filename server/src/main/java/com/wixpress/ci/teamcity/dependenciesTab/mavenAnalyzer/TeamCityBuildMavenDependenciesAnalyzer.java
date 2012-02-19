@@ -1,6 +1,7 @@
 package com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer;
 
 import com.wixpress.ci.teamcity.dependenciesTab.CollectingMessagesListenerLogger;
+import com.wixpress.ci.teamcity.domain.LogMessage;
 import com.wixpress.ci.teamcity.domain.MModule;
 import com.wixpress.ci.teamcity.maven.MavenBooter;
 import com.wixpress.ci.teamcity.maven.MavenProjectDependenciesAnalyzer;
@@ -40,13 +41,14 @@ public class TeamCityBuildMavenDependenciesAnalyzer {
     private static final File tempDir = new File(System.getProperty( "java.io.tmpdir" ));
     private MavenProjectDependenciesAnalyzer mavenDependenciesAnalyzer;
     private MavenBooter mavenBooter;
+    // todo extract to a executer class
     private ExecutorService executorService = Executors.newFixedThreadPool(10);
     private Map<String, CollectDependenciesRunner> runningCollections = new ConcurrentHashMap<String, CollectDependenciesRunner>();
     private ObjectMapper objectMapper;
 
-    public TeamCityBuildMavenDependenciesAnalyzer(MavenBooter mavenBooter, ObjectMapper objectMapper) {
+    public TeamCityBuildMavenDependenciesAnalyzer(MavenBooter mavenBooter, ObjectMapper objectMapper, MavenProjectDependenciesAnalyzer mavenProjectDependenciesAnalyzer) {
         this.mavenBooter = mavenBooter;
-        this.mavenDependenciesAnalyzer = new MavenProjectDependenciesAnalyzer(mavenBooter.remoteRepositories(), mavenBooter.repositorySystem());
+        this.mavenDependenciesAnalyzer = mavenProjectDependenciesAnalyzer;
         this.objectMapper = objectMapper;
     }
 
@@ -135,6 +137,8 @@ public class TeamCityBuildMavenDependenciesAnalyzer {
             return new DependenciesResult(ResultType.notRun);
         try {
             ModuleStorage moduleStorage = objectMapper.readValue(serialized, ModuleStorage.class);
+            if (moduleStorage.isException)
+                return new DependenciesResult(moduleStorage.getMessages());
             if (checkIfRefreshNeeded && hasNewerVcsRevision(moduleStorage.getVcsRevisions(), getBuildVcsRevisions(buildType)))
                 return new DependenciesResult(ResultType.needsRefresh, moduleStorage.getModule());
             else
@@ -148,6 +152,13 @@ public class TeamCityBuildMavenDependenciesAnalyzer {
 
     private void save(MModule mModule, SBuildType buildType, CollectingMessagesListenerLogger listenerLogger) throws IOException, VcsException {
         ModuleStorage moduleStorage = new ModuleStorage(mModule, getBuildVcsRevisions(buildType));
+        String serializedModule = objectMapper.writeValueAsString(moduleStorage);
+        buildType.getCustomDataStorage(DEPENDENCIES_STORAGE).putValue(BUILD_DEPENDENCIES, serializedModule);
+        listenerLogger.info("build dependencies saved");
+    }
+
+    private void saveError(SBuildType buildType, CollectingMessagesListenerLogger listenerLogger) throws IOException {
+        ModuleStorage moduleStorage = new ModuleStorage(listenerLogger.getMessages());
         String serializedModule = objectMapper.writeValueAsString(moduleStorage);
         buildType.getCustomDataStorage(DEPENDENCIES_STORAGE).putValue(BUILD_DEPENDENCIES, serializedModule);
         listenerLogger.info("build dependencies saved");
@@ -195,11 +206,12 @@ public class TeamCityBuildMavenDependenciesAnalyzer {
                 }
             } catch (Exception e) {
                 listenerLogger.failedCollectingDependencies(buildType, e);
+                try {
+                    saveError(buildType, listenerLogger);
+                } catch (Exception e1) {
+                    // ignore this error
+                }
             }
-        }
-
-        public String getId() {
-            return id;
         }
 
         public boolean isCompleted() {
@@ -215,7 +227,7 @@ public class TeamCityBuildMavenDependenciesAnalyzer {
                 return new CollectProgress(listenerLogger.getMessages(), completed, id);
             }
             else {
-                List<CollectingMessagesListenerLogger.ListenerMessage> newMessages = listenerLogger.getMessages(position);
+                List<LogMessage> newMessages = listenerLogger.getMessages(position);
                 return new CollectProgress(newMessages, position+newMessages.size(), completed, id);
             }
         }
@@ -224,6 +236,8 @@ public class TeamCityBuildMavenDependenciesAnalyzer {
     public static class ModuleStorage {
         private MModule module;
         private Map<String, String> vcsRevisions = newHashMap();
+        private List<LogMessage> messages = newArrayList();
+        private boolean isException;
 
         public ModuleStorage() {
         }
@@ -231,6 +245,12 @@ public class TeamCityBuildMavenDependenciesAnalyzer {
         public ModuleStorage(MModule module, Map<String, String> vcsRevisions) {
             this.module = module;
             this.vcsRevisions = vcsRevisions;
+            this.isException = false;
+        }
+
+        public ModuleStorage(List<LogMessage> messages) {
+            this.messages = messages;
+            this.isException = true;
         }
 
         public MModule getModule() {
@@ -247,6 +267,22 @@ public class TeamCityBuildMavenDependenciesAnalyzer {
 
         public void setVcsRevisions(Map<String, String> vcsRevisions) {
             this.vcsRevisions = vcsRevisions;
+        }
+
+        public List<LogMessage> getMessages() {
+            return messages;
+        }
+
+        public void setMessages(List<LogMessage> messages) {
+            this.messages = messages;
+        }
+
+        public boolean isException() {
+            return isException;
+        }
+
+        public void setException(boolean exception) {
+            isException = exception;
         }
     }
 }

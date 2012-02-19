@@ -1,6 +1,6 @@
 package com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer;
 
-import com.wixpress.ci.teamcity.dependenciesTab.CollectingMessagesListenerLogger;
+import com.wixpress.ci.teamcity.domain.LogMessage;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import static com.google.common.collect.Lists.newArrayList;
 * @since 2/19/12
 */
 public class CollectProgress {
-    private List<CollectingMessagesListenerLogger.ListenerMessage> messages;
+    private List<LogMessage> messages;
     private int position;
     private boolean completed;
     private boolean runFound;
@@ -20,7 +20,7 @@ public class CollectProgress {
     public CollectProgress() {
     }
 
-    public CollectProgress(List<CollectingMessagesListenerLogger.ListenerMessage> messages, boolean completed, String buildTypeId) {
+    public CollectProgress(List<LogMessage> messages, boolean completed, String buildTypeId) {
         this.messages = messages;
         this.position = messages.size();
         this.completed = completed;
@@ -28,7 +28,7 @@ public class CollectProgress {
         this.buildTypeId = buildTypeId;
     }
 
-    public CollectProgress(List<CollectingMessagesListenerLogger.ListenerMessage> messages, int position, boolean completed, String buildTypeId) {
+    public CollectProgress(List<LogMessage> messages, int position, boolean completed, String buildTypeId) {
         this.messages = messages;
         this.position = position;
         this.completed = completed;
@@ -44,11 +44,11 @@ public class CollectProgress {
         this.buildTypeId = buildTypeId;
     }
 
-    public List<CollectingMessagesListenerLogger.ListenerMessage> getMessages() {
+    public List<LogMessage> getMessages() {
         return messages;
     }
 
-    public void setMessages(List<CollectingMessagesListenerLogger.ListenerMessage> messages) {
+    public void setMessages(List<LogMessage> messages) {
         this.messages = messages;
     }
 
