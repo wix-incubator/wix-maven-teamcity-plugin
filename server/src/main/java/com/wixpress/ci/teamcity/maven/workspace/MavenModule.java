@@ -1,5 +1,7 @@
 package com.wixpress.ci.teamcity.maven.workspace;
 
+import com.wixpress.ci.teamcity.domain.IArtifact;
+
 import java.io.File;
 import java.util.List;
 
@@ -9,7 +11,7 @@ import static com.google.common.collect.Lists.newArrayList;
  * @author yoav
  * @since 2/14/12
  */
-public class MavenModule {
+public class MavenModule implements IArtifact {
     private String groupId;
     private String artifactId;
     private String version;

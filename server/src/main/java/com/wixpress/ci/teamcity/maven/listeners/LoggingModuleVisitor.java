@@ -10,17 +10,13 @@
  *******************************************************************************/
 package com.wixpress.ci.teamcity.maven.listeners;
 
-import com.wixpress.ci.teamcity.maven.ModuleDependencies;
-import com.wixpress.ci.teamcity.maven.ModuleVisitor;
-import org.sonatype.aether.graph.DependencyNode;
-import org.sonatype.aether.graph.DependencyVisitor;
+import com.wixpress.ci.teamcity.domain.MArtifact;
+import com.wixpress.ci.teamcity.domain.MArtifactVisitor;
 
 /**
  * A dependency visitor that dumps the graph to the console.
  */
-public class LoggingModuleVisitor
-    implements ModuleVisitor, DependencyVisitor
-{
+public class LoggingModuleVisitor implements MArtifactVisitor {
 
     private ListenerLogger out;
 
@@ -31,9 +27,8 @@ public class LoggingModuleVisitor
         this.out = out;
     }
 
-    public boolean visitEnter( ModuleDependencies node )
-    {
-        out.info( currentIndent + node );
+    public boolean visitEnter(MArtifact mArtifact) {
+        out.info( currentIndent + mArtifact );
         if ( currentIndent.length() <= 0 )
         {
             currentIndent = "+- ";
@@ -45,30 +40,7 @@ public class LoggingModuleVisitor
         return true;
     }
 
-    public boolean visitLeave( ModuleDependencies node )
-    {
-        currentIndent = currentIndent.substring( 3, currentIndent.length() );
-        return true;
-    }
-
-    public DependencyVisitor getDependencyVisitor() {
-        return this;
-    }
-
-    public boolean visitEnter(DependencyNode node) {
-        out.info( currentIndent + node );
-        if ( currentIndent.length() <= 0 )
-        {
-            currentIndent = "+- ";
-        }
-        else
-        {
-            currentIndent = "|  " + currentIndent;
-        }
-        return true;
-    }
-
-    public boolean visitLeave(DependencyNode node) {
+    public boolean visitLeave(MArtifact mArtifact) {
         currentIndent = currentIndent.substring( 3, currentIndent.length() );
         return true;
     }

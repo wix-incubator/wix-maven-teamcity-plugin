@@ -1,5 +1,7 @@
 package com.wixpress.ci.teamcity.maven;
 
+import com.wixpress.ci.teamcity.domain.MDependency;
+import com.wixpress.ci.teamcity.domain.MModule;
 import com.wixpress.ci.teamcity.maven.listeners.*;
 import com.wixpress.ci.teamcity.maven.workspace.MavenWorkspaceReader;
 import com.wixpress.ci.teamcity.maven.workspace.MavenWorkspaceReaderException;
@@ -14,6 +16,7 @@ import org.sonatype.aether.resolution.ArtifactDescriptorException;
 import java.io.File;
 import java.io.IOException;
 
+import static com.wixpress.ci.teamcity.maven.Matchers.IsArtifact;
 import static com.wixpress.ci.teamcity.maven.Matchers.IsDependencyNode;
 import static com.wixpress.ci.teamcity.maven.Matchers.IsMavenModule;
 import static org.hamcrest.Matchers.hasItem;
@@ -55,14 +58,14 @@ public class MavenProjectDependenciesAnalyzerTest {
         MavenRepositorySystemSession session = mavenBooter.newRepositorySystemSession(new LoggingTransferListener(listenerLogger), new LoggingRepositoryListener(listenerLogger));
         session.setWorkspaceReader(workspaceReader);
 
-        ModuleDependencies moduleDependencies = mavenProjectDependenciesAnalyzer.getModuleDependencies(workspaceReader.getRootModule(), session);
+        MModule mModule = mavenProjectDependenciesAnalyzer.getModuleDependencies(workspaceReader.getRootModule(), session);
 
-        assertThat(moduleDependencies.getMavenModule(), IsMavenModule("com.sonatype.example", "projA", "1.0.0-SNAPSHOT"));
-        assertThat(moduleDependencies.getDependencyTree(), IsDependencyNode("com.sonatype.example", "projA", "1.0.0-SNAPSHOT"));
-        assertThat(moduleDependencies.getDependencyTree().getChildren(), hasItem(IsDependencyNode("org.apache.maven", "maven-model", "3.0.4")));
+        assertThat(mModule, IsArtifact("com.sonatype.example", "projA", "1.0.0-SNAPSHOT"));
+        assertThat(mModule.getDependencyTree(), IsArtifact("com.sonatype.example", "projA", "1.0.0-SNAPSHOT"));
+        assertThat(mModule.getDependencyTree().getDependencies(), hasItem(Matchers.<MDependency>IsArtifact("org.apache.maven", "maven-model", "3.0.4")));
 
 
-        moduleDependencies.accept(new LoggingModuleVisitor(listenerLogger));
+        mModule.accept(new LoggingModuleVisitor(listenerLogger));
     } 
     
     @Test
@@ -73,13 +76,13 @@ public class MavenProjectDependenciesAnalyzerTest {
         MavenRepositorySystemSession session = mavenBooter.newRepositorySystemSession(new LoggingTransferListener(listenerLogger), new LoggingRepositoryListener(listenerLogger));
         session.setWorkspaceReader(workspaceReader);
 
-        ModuleDependencies moduleDependencies = mavenProjectDependenciesAnalyzer.getModuleDependencies(workspaceReader.getRootModule(), session);
+        MModule mModule = mavenProjectDependenciesAnalyzer.getModuleDependencies(workspaceReader.getRootModule(), session);
 
-        assertThat(moduleDependencies.getMavenModule(), IsMavenModule("com.sonatype.example", "projB", "1.0.0-SNAPSHOT"));
-        assertThat(moduleDependencies.getDependencyTree(), IsDependencyNode("com.sonatype.example", "projB", "1.0.0-SNAPSHOT"));
-        assertThat(moduleDependencies.getMavenModule().getSubModules(), hasItem(IsMavenModule("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT")));
-        assertThat(moduleDependencies.getMavenModule().getSubModules(), hasItem(IsMavenModule("com.sonatype.example", "moduleB", "1.0.0-SNAPSHOT")));
+        assertThat(mModule, IsArtifact("com.sonatype.example", "projB", "1.0.0-SNAPSHOT"));
+        assertThat(mModule.getDependencyTree(), IsArtifact("com.sonatype.example", "projB", "1.0.0-SNAPSHOT"));
+        assertThat(mModule.getSubModules(), hasItem(Matchers.<MModule>IsArtifact("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT")));
+        assertThat(mModule.getSubModules(), hasItem(Matchers.<MModule>IsArtifact("com.sonatype.example", "moduleB", "1.0.0-SNAPSHOT")));
 
-        moduleDependencies.accept(new LoggingModuleVisitor(listenerLogger));
+        mModule.accept(new LoggingModuleVisitor(listenerLogger));
     }
 }

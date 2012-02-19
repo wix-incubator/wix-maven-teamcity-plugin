@@ -1,5 +1,7 @@
 package com.wixpress.ci.teamcity.dependenciesTab;
 
+import com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.CollectProgress;
+import com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.MavenBuildDependenciesAnalyzer;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
@@ -16,10 +18,10 @@ import java.util.HashMap;
  */
 public class DependenciesProgressController extends BaseController {
     private final WebControllerManager myManager;
-    private final TeamCityProjectDependenciesAnalyzer dependenciesAnalyzer;
+    private final MavenBuildDependenciesAnalyzer dependenciesAnalyzer;
     private final ObjectMapper objectMapper;
 
-    public DependenciesProgressController(SBuildServer server, WebControllerManager myManager, TeamCityProjectDependenciesAnalyzer dependenciesAnalyzer, ObjectMapper objectMapper) {
+    public DependenciesProgressController(SBuildServer server, WebControllerManager myManager, MavenBuildDependenciesAnalyzer dependenciesAnalyzer, ObjectMapper objectMapper) {
         super(server);
         this.myManager = myManager;
         this.dependenciesAnalyzer = dependenciesAnalyzer;
@@ -30,7 +32,7 @@ public class DependenciesProgressController extends BaseController {
     protected ModelAndView doHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String id = request.getParameter("id");
         Integer token = Integer.parseInt(request.getParameter("token"));
-        TeamCityProjectDependenciesAnalyzer.CollectProgress collectProgress = dependenciesAnalyzer.getProgress(id, token);
+        CollectProgress collectProgress = dependenciesAnalyzer.getProgress(id, token);
         HashMap params = new HashMap();
         params.put("json", objectMapper.writeValueAsString(collectProgress));
         return new ModelAndView("/plugins/wix-maven-3-teamcity-plugin/renderJson.jsp", params);

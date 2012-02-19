@@ -3,6 +3,7 @@ package com.wixpress.ci.teamcity.dependenciesTab;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.wixpress.ci.teamcity.maven.listeners.ListenerLogger;
+import jetbrains.buildServer.serverSide.SBuildType;
 import org.joda.time.DateTime;
 
 import java.awt.*;
@@ -61,7 +62,29 @@ public class CollectingMessagesListenerLogger implements ListenerLogger {
 
     public List<ListenerMessage> getMessages(Integer position) {
         synchronized (messages) {
-            return new ArrayList<ListenerMessage>(messages.subList(position, messages.size()));
+            if (position < messages.size())
+                return new ArrayList<ListenerMessage>(messages.subList(position, messages.size()));
+            else
+                return newArrayList();
+        }
+    }
+
+    public void completedCollectingDependencies(SBuildType buildType) {
+        synchronized (messages) {
+            String message = String.format("completed collecting dependencies for %s:%s", buildType.getProject().getName(), buildType.getName());
+            System.out.println(message);
+            messages.add(new ListenerMessage(message, MessageType.info));
+            lastMessageTime = new DateTime();
+        }
+    }
+
+    public void failedCollectingDependencies(SBuildType buildType, Exception e) {
+        synchronized (messages) {
+            String message = String.format("failed collecting dependencies for %s:%s", buildType.getProject().getName(), buildType.getName());
+            System.out.println(message);
+            e.printStackTrace();
+            messages.add(new ListenerMessage(message, MessageType.error, e));
+            lastMessageTime = new DateTime();
         }
     }
 

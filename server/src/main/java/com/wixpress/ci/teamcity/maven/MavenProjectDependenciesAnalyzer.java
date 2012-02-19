@@ -1,5 +1,9 @@
 package com.wixpress.ci.teamcity.maven;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import com.wixpress.ci.teamcity.domain.MDependency;
+import com.wixpress.ci.teamcity.domain.MModule;
 import com.wixpress.ci.teamcity.maven.workspace.MavenModule;
 import org.apache.maven.model.building.ModelBuildingException;
 import org.sonatype.aether.RepositorySystem;
@@ -32,12 +36,42 @@ public class MavenProjectDependenciesAnalyzer {
         this.remoteRepositories = remoteRepositories;
         this.repositorySystem = repositorySystem;
     }
+    
+    public MModule getModuleDependencies(MavenModule mavenModule, RepositorySystemSession session) throws ArtifactDescriptorException, IOException, DependencyCollectionException, ModelBuildingException {
+        ModuleDependencies moduleDependencies = doGetModuleDependencies(mavenModule, session);
+        return toMModule(moduleDependencies);
+        
+    }
 
-    public ModuleDependencies getModuleDependencies(MavenModule mavenModule, RepositorySystemSession session) throws IOException, ModelBuildingException, ArtifactDescriptorException, DependencyCollectionException {
+    private MModule toMModule(ModuleDependencies moduleDependencies) {
+        MModule mModule = new MModule(moduleDependencies.getMavenModule());
+        mModule.setDependencyTree(toMDependencies(moduleDependencies.getDependencyTree()));
+        mModule.setSubModules(Lists.transform(moduleDependencies.getChildModuleDependencieses(), new Function<ModuleDependencies, MModule>() {
+            public MModule apply(ModuleDependencies input) {
+                return toMModule(input);
+            }
+        }));
+        return mModule;
+    }
+
+    private MDependency toMDependencies(DependencyNode dependencyTree) {
+        MDependency mDependency = new MDependency(
+                dependencyTree.getDependency().getArtifact().getGroupId(),
+                dependencyTree.getDependency().getArtifact().getArtifactId(),
+                dependencyTree.getDependency().getArtifact().getVersion());
+        mDependency.setDependencies(Lists.transform(dependencyTree.getChildren(), new Function<DependencyNode, MDependency>() {
+            public MDependency apply(DependencyNode input) {
+                return toMDependencies(input);
+            }
+        }));
+        return mDependency;
+    }
+
+    private ModuleDependencies doGetModuleDependencies(MavenModule mavenModule, RepositorySystemSession session) throws IOException, ModelBuildingException, ArtifactDescriptorException, DependencyCollectionException {
         DependencyNode moduleDependencyTree = getDependenciesOfModule(mavenModule, session);
         ModuleDependencies moduleDependencies = new ModuleDependencies(mavenModule, moduleDependencyTree);
         for (MavenModule module: mavenModule.getSubModules()) {
-            moduleDependencies.getChildModuleDependencieses().add(getModuleDependencies(module, session));
+            moduleDependencies.getChildModuleDependencieses().add(doGetModuleDependencies(module, session));
         }
         return moduleDependencies;
     }

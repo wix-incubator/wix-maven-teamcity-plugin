@@ -1,5 +1,6 @@
 package com.wixpress.ci.teamcity.maven;
 
+import com.wixpress.ci.teamcity.domain.IArtifact;
 import com.wixpress.ci.teamcity.maven.workspace.MavenModule;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -55,4 +56,24 @@ public class Matchers {
         };
     }
 
+    public static <M extends IArtifact> Matcher<M> IsArtifact(final String groupId, final String artifactId, final String version) {
+        return new TypeSafeMatcher<M>() {
+            @Override
+            public boolean matchesSafely(M mavenModule) {
+                return groupId.equals(mavenModule.getGroupId()) &&
+                        artifactId.equals(mavenModule.getArtifactId()) &&
+                        version.equals(mavenModule.getVersion());
+
+            }
+
+            public void describeTo(Description description) {
+                description.appendText("MavenModule(")
+                        .appendText(groupId)
+                        .appendText(":")
+                        .appendText(artifactId)
+                        .appendText(":")
+                        .appendText(version);
+            }
+        };
+    }
 }
