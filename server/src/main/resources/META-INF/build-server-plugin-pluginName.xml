@@ -14,9 +14,11 @@
         <constructor-arg index="0" ref="remoteRepositories"/>
         <constructor-arg index="1" ref="repositorySystem"/>
     </bean>
-    <bean class="com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer" destroy-method="close">
+    <bean id="executor" class="com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.CollectDependenciesExecutor" destroy-method="shutdown"/>
+    <bean class="com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer">
         <constructor-arg ref="mavenBooter"/>
         <constructor-arg ref="objectMapper"/>
         <constructor-arg ref="mavenProjectDependenciesAnalyzer"/>
+        <constructor-arg ref="executor"/>
     </bean>
 </beans>
