@@ -1,6 +1,6 @@
 package com.wixpress.ci.teamcity.dependenciesTab;
 
-import com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.MavenBuildDependenciesAnalyzer;
+import com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.users.SUser;
@@ -17,9 +17,9 @@ import java.util.Map;
  */
 public class DependenciesTabExtension extends BuildTypeTab {
 
-    private MavenBuildDependenciesAnalyzer dependenciesAnalyzer;
+    private TeamCityBuildMavenDependenciesAnalyzer dependenciesAnalyzer;
 
-    public DependenciesTabExtension(WebControllerManager manager, ProjectManager projectManager, MavenBuildDependenciesAnalyzer dependenciesAnalyzer) {
+    public DependenciesTabExtension(WebControllerManager manager, ProjectManager projectManager, TeamCityBuildMavenDependenciesAnalyzer dependenciesAnalyzer) {
         super("wix-maven-3-teamcity-plugin", "Maven 3 Dependencies", manager, projectManager, "dependenciesTab.jsp");
         this.dependenciesAnalyzer = dependenciesAnalyzer;
     }

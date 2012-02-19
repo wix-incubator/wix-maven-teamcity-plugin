@@ -1,8 +1,7 @@
 package com.wixpress.ci.teamcity.dependenciesTab;
 
-import com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.MavenBuildDependenciesAnalyzer;
+import com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer;
 import jetbrains.buildServer.serverSide.SBuildServer;
-import jetbrains.buildServer.serverSide.SBuildType;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.util.Map;
@@ -13,13 +12,13 @@ import static com.google.common.collect.Maps.newHashMap;
  * @author yoav
  * @since 2/18/12
  */
-public class TeamCityDependenciesAnalyzer {
+public class TeamCityBuildDependenciesAnalyzer {
     
     private static final String DEPENDENCIES_STORAGE = "com.wixpress.dependencies-storage";
     private static final String BUILD_DEPENDENCIES = "build-dependencies";
     private SBuildServer server;
     private ObjectMapper objectMapper;
-    private MavenBuildDependenciesAnalyzer projectDependenciesAnalyzer;
+    private TeamCityBuildMavenDependenciesAnalyzer dependenciesAnalyzer;
     private Map<String, String> runningCollections = newHashMap();
     
 //    public BuildDependenciesResponse getBuildDependencies(String buildTypeId) {

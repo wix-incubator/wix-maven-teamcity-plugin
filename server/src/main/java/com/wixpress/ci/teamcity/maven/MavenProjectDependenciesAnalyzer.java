@@ -21,9 +21,8 @@ import org.sonatype.aether.util.artifact.DefaultArtifact;
 import java.io.IOException;
 import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
-
 /**
+ * Analyses the dependencies of a (multi-module) maven project regardless of TeamCity or other maven projects
  * @author yoav
  * @since 2/15/12
  */

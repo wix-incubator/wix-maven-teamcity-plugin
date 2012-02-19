@@ -17,8 +17,6 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.wixpress.ci.teamcity.maven.Matchers.IsArtifact;
-import static com.wixpress.ci.teamcity.maven.Matchers.IsDependencyNode;
-import static com.wixpress.ci.teamcity.maven.Matchers.IsMavenModule;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertThat;
 

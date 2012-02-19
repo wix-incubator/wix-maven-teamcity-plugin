@@ -1,7 +1,7 @@
 package com.wixpress.ci.teamcity.dependenciesTab;
 
 import com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.CollectProgress;
-import com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.MavenBuildDependenciesAnalyzer;
+import com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
@@ -18,10 +18,10 @@ import java.util.HashMap;
  */
 public class DependenciesProgressController extends BaseController {
     private final WebControllerManager myManager;
-    private final MavenBuildDependenciesAnalyzer dependenciesAnalyzer;
+    private final TeamCityBuildMavenDependenciesAnalyzer dependenciesAnalyzer;
     private final ObjectMapper objectMapper;
 
-    public DependenciesProgressController(SBuildServer server, WebControllerManager myManager, MavenBuildDependenciesAnalyzer dependenciesAnalyzer, ObjectMapper objectMapper) {
+    public DependenciesProgressController(SBuildServer server, WebControllerManager myManager, TeamCityBuildMavenDependenciesAnalyzer dependenciesAnalyzer, ObjectMapper objectMapper) {
         super(server);
         this.myManager = myManager;
         this.dependenciesAnalyzer = dependenciesAnalyzer;

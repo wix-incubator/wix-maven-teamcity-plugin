@@ -28,10 +28,11 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
+ * Analyses the maven dependencies of a single TeamCity build configuration.
  * @author yoav
  * @since 2/16/12
  */
-public class MavenBuildDependenciesAnalyzer {
+public class TeamCityBuildMavenDependenciesAnalyzer {
 
     private static final String DEPENDENCIES_STORAGE = "com.wixpress.dependencies-storage";
     private static final String BUILD_DEPENDENCIES = "build-dependencies";
@@ -43,7 +44,7 @@ public class MavenBuildDependenciesAnalyzer {
     private Map<String, CollectDependenciesRunner> runningCollections = new ConcurrentHashMap<String, CollectDependenciesRunner>();
     private ObjectMapper objectMapper;
 
-    public MavenBuildDependenciesAnalyzer(MavenBooter mavenBooter, ObjectMapper objectMapper) {
+    public TeamCityBuildMavenDependenciesAnalyzer(MavenBooter mavenBooter, ObjectMapper objectMapper) {
         this.mavenBooter = mavenBooter;
         this.mavenDependenciesAnalyzer = new MavenProjectDependenciesAnalyzer(mavenBooter.remoteRepositories(), mavenBooter.repositorySystem());
         this.objectMapper = objectMapper;

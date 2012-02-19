@@ -7,7 +7,7 @@
     <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesProgressController" init-method="register"/>
     <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabExtension"/>
 
-    <bean class="com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.MavenBuildDependenciesAnalyzer" destroy-method="close">
+    <bean class="com.wixpress.ci.teamcity.dependenciesTab.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer" destroy-method="close">
         <constructor-arg ref="mavenBooter"/>
     </bean>
     <bean id="mavenBooter" class="com.wixpress.ci.teamcity.maven.MavenBooter"/>
