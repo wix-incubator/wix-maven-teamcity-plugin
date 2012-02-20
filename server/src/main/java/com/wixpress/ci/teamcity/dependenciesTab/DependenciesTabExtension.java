@@ -36,29 +36,30 @@ public class DependenciesTabExtension extends BuildTypeTab {
     @Override
     protected void fillModel(Map model, HttpServletRequest request, @NotNull SBuildType buildType, SUser user) {
         try {
-        DependenciesResult dependenciesResult = dependenciesAnalyzer.analyzeDependencies(buildType);
-        switch (dependenciesResult.getResultType()) {
-            case current:
-            case needsRefresh:
-                model.put("module", objectMapper.writeValueAsString(dependenciesResult.getModule()));
-                model.put("resultType", "dependencies");
-                break;
-            case exception:
-                model.put("fullTrace", objectMapper.writeValueAsString(dependenciesResult.getFullTrace()));
-                model.put("resultType", "error");
-                break;
-            case notRun:
-                model.put("resultType", "notRun");
-                break;
-            case runningAsync:
-                model.put("resultType", "running");
-        }
+            DependenciesResult dependenciesResult = dependenciesAnalyzer.analyzeDependencies(buildType);
+            model.put("resultType", dependenciesResult.getResultType().name());
+            switch (dependenciesResult.getResultType()) {
+                case current:
+                case needsRefresh:
+                    model.put("module", objectMapper.writeValueAsString(dependenciesResult.getModule()));
+                    model.put("fullTrace", "{}");
+                    break;
+                case exception:
+                    model.put("module", "{}");
+                    model.put("fullTrace", objectMapper.writeValueAsString(dependenciesResult.getFullTrace()));
+                    break;
+                case notRun:
+                case runningAsync:
+                    model.put("module", "{}");
+                    model.put("fullTrace", "{}");
+            }
         } catch (Exception e) {
+            model.put("module", "{}");
             model.put("fullTrace", serializeException(e));
             model.put("resultType", "error");
         }
     }
-    
+
     private String serializeException(Exception e) {
         LogMessage logMessage = new LogMessage(e.getMessage(), LogMessageType.error, e);
         try {
