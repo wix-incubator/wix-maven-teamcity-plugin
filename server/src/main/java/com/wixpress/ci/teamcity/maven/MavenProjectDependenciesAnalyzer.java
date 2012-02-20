@@ -57,7 +57,9 @@ public class MavenProjectDependenciesAnalyzer {
         MDependency mDependency = new MDependency(
                 dependencyTree.getDependency().getArtifact().getGroupId(),
                 dependencyTree.getDependency().getArtifact().getArtifactId(),
-                dependencyTree.getDependency().getArtifact().getVersion());
+                dependencyTree.getDependency().getArtifact().getVersion(),
+                dependencyTree.getDependency().getScope(),
+                dependencyTree.getDependency().isOptional());
         mDependency.setDependencies(Lists.transform(dependencyTree.getChildren(), new Function<DependencyNode, MDependency>() {
             public MDependency apply(DependencyNode input) {
                 return toMDependencies(input);

@@ -15,6 +15,10 @@
     .module-dependencies {border: solid #38761D 1px;background-color: #e9fae2}
     .module {font-size:10px; color:#EC7000;background-color: #FFF0E1; border:solid #EC7000 1px; display:inline-block;border-radius: 4px; padding:0 3px; }
     .dependency {font-size:10px; color:#38761D;background-color: #D9EAD3; border:solid #38761D 1px; display:inline-block;border-radius: 4px; padding:0 3px;}
+    .test {font-size:10px; color:#5229A3;background-color: #E0D5F9; border:solid #5229A3 1px; display:inline-block;border-radius: 4px; padding:0 3px;}
+    .provided {font-size:10px; color:#666;background-color: #ddd; border:solid #666 1px; display:inline-block;border-radius: 4px; padding:0 3px;}
+    .optional {font-size:10px; color:#5A6986;background-color: #DEE5F2; border:solid #5A6986 1px; display:inline-block;border-radius: 4px; padding:0 3px;}
+
 </style>
 <h2>Module Dependencies:</h2>
 <script type="text/javascript">
@@ -65,6 +69,9 @@
         return renderNode(
                 "<div class=\'dependency\'> dependency </div>"+
                         (dependency.isModule?" <div class=\'module\'> module </div>":"") +
+                        (dependency.scope=="test"?" <div class=\'test\'> test </div>":"") +
+                        (dependency.scope=="provided"?" <div class=\'provided\'> provided </div>":"") +
+                        (dependency.scope=="isOptional"?" <div class=\'optional\'> optional </div>":"") +
                 "<span class='tree-text'> " + dependency.groupId + ":" + dependency.artifactId + ":" + dependency.version + "</span>"
                 ,
                 html, false, hasChildren);

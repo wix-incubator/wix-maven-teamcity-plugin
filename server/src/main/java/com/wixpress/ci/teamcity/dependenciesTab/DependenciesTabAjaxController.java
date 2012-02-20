@@ -48,7 +48,7 @@ public class DependenciesTabAjaxController extends BaseController {
             return actions.get(action).handle(request, response);
         else {
             writeError(response, 400, String.format("action [%s] not found", action));
-            return new ModelAndView();
+            return newEmptyModelAndView();
         }
     }
 
@@ -103,7 +103,7 @@ public class DependenciesTabAjaxController extends BaseController {
                 Object result = doHandle(request);
                 response.setHeader("content-type", "application/json");
                 objectMapper.writeValue(response.getOutputStream(), result);
-                return new ModelAndView();
+                return newEmptyModelAndView();
             } catch (BadRequestException e) {
                 return writeError(response, 400, e);
             } catch (ResourceNotFoundException e) {
@@ -122,7 +122,7 @@ public class DependenciesTabAjaxController extends BaseController {
         } catch (IOException e1) {
             // ignore this error
         }
-        return new ModelAndView();
+        return newEmptyModelAndView();
     }
 
     private ModelAndView writeError(HttpServletResponse response, int code, String cause) {
@@ -132,7 +132,11 @@ public class DependenciesTabAjaxController extends BaseController {
         } catch (IOException e1) {
             // ignore this error
         }
-        return new ModelAndView();
+        return newEmptyModelAndView();
+    }
+
+    private ModelAndView newEmptyModelAndView() {
+       return null;
     }
 
     protected String getParameter(HttpServletRequest request, String name)  {

@@ -1,8 +1,6 @@
 package com.wixpress.ci.teamcity.maven;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.wixpress.ci.teamcity.maven.workspace.MavenWorkspaceListener;
 import com.wixpress.ci.teamcity.maven.workspace.MavenWorkspaceReader;
@@ -11,9 +9,7 @@ import com.wixpress.ci.teamcity.maven.workspace.WorkspaceFilesystem;
 import org.apache.maven.model.building.DefaultModelProcessor;
 import org.apache.maven.model.building.ModelProcessor;
 import org.apache.maven.model.io.DefaultModelReader;
-import org.apache.maven.model.io.ModelReader;
 import org.apache.maven.model.locator.DefaultModelLocator;
-import org.apache.maven.model.locator.ModelLocator;
 import org.apache.maven.properties.internal.EnvironmentUtils;
 import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.apache.maven.repository.internal.MavenServiceLocator;
@@ -26,12 +22,16 @@ import org.apache.maven.settings.io.DefaultSettingsWriter;
 import org.apache.maven.settings.validation.DefaultSettingsValidator;
 import org.sonatype.aether.RepositoryListener;
 import org.sonatype.aether.RepositorySystem;
+import org.sonatype.aether.collection.DependencySelector;
 import org.sonatype.aether.connector.file.FileRepositoryConnectorFactory;
 import org.sonatype.aether.connector.wagon.WagonProvider;
 import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
 import org.sonatype.aether.repository.*;
 import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
 import org.sonatype.aether.transfer.TransferListener;
+import org.sonatype.aether.util.graph.selector.AndDependencySelector;
+import org.sonatype.aether.util.graph.selector.ExclusionDependencySelector;
+import org.sonatype.aether.util.graph.selector.OptionalDependencySelector;
 import org.sonatype.aether.util.repository.DefaultProxySelector;
 
 import java.io.File;
@@ -145,12 +145,15 @@ public class MavenBooter {
 
         LocalRepository localRepo = new LocalRepository(settings().getLocalRepository());
         session.setLocalRepositoryManager( repositorySystem().newLocalRepositoryManager(localRepo) );
+        DependencySelector depFilter =
+            new AndDependencySelector(new ScopeIncludeFirstDependencySelector("test", "provided"), new OptionalDependencySelector(), new ExclusionDependencySelector() );
+        session.setDependencySelector(depFilter);
 
         session.setTransferListener( transferListener );
         session.setRepositoryListener( repositoryListener );
 
-        // uncomment to generate dirty trees
-        // session.setDependencyGraphTransformer( null );
+//        uncomment to generate dirty trees
+//        session.setDependencyGraphTransformer( null );
 
         if (settings().getActiveProxy() != null) {
             setupSessionProxy(session, settings().getActiveProxy());
