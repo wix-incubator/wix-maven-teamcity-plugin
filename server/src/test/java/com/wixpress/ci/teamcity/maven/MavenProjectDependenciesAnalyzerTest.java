@@ -108,31 +108,4 @@ public class MavenProjectDependenciesAnalyzerTest {
         ));
     }
 
-    @Test
-    public void proij() throws MavenWorkspaceReaderException, ArtifactDescriptorException, IOException, DependencyCollectionException, ModelBuildingException {
-        File repositoryRoot = new File("c:/work/wix/git/tmp/wix-framework-parents-and-samples/");
-        WorkspaceFilesystem workspaceFilesystem = new FSWorkspaceFilesystem(repositoryRoot);
-        MavenWorkspaceReader workspaceReader =  mavenBooter.newWorkspaceReader(workspaceFilesystem, new LoggingMavenWorkspaceListener(listenerLogger));
-        MavenRepositorySystemSession session = mavenBooter.newRepositorySystemSession(new LoggingTransferListener(listenerLogger), new LoggingRepositoryListener(listenerLogger));
-        session.setWorkspaceReader(workspaceReader);
-
-        MModule mModule = mavenProjectDependenciesAnalyzer
-                .getModuleDependencies(workspaceReader.getRootModule(), session, new LoggingDependenciesAnalyzerListener(listenerLogger));
-
-        mModule.accept(new LoggingModuleVisitor(listenerLogger));
-    }
-
-    private MDependency findDependency(MModule mModule, Matcher<MDependency> matcher) {
-        for (MDependency dependency : mModule.getDependencyTree().getDependencies())
-            if (matcher.matches(dependency))
-                return dependency;
-        throw new AssertionError("dependency not found " + StringDescription.toString(matcher));
-    }
-
-    private MModule findModule(MModule mModule, Matcher<MModule> matcher) {
-        for (MModule module: mModule.getSubModules())
-            if (matcher.matches(module))
-                return module;
-        throw new AssertionError("module not found " + StringDescription.toString(matcher));
-    }
 }
