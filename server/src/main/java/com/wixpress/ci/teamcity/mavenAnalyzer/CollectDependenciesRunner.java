@@ -23,6 +23,7 @@ class CollectDependenciesRunner implements Runnable {
     private CollectingMessagesListenerLogger listenerLogger = new CollectingMessagesListenerLogger();
     private DateTime completedTime = null;
     private boolean completed = false;
+    private boolean isError = false;
     private TeamCityBuildMavenDependenciesAnalyzer teamCityBuildMavenDependenciesAnalyzer;
 
 
@@ -41,7 +42,7 @@ class CollectDependenciesRunner implements Runnable {
 
                 MModule mModule = teamCityBuildMavenDependenciesAnalyzer.getMavenDependenciesAnalyzer()
                         .getModuleDependencies(workspaceReader.getRootModule(), session, new LoggingDependenciesAnalyzerListener(listenerLogger));
-                mModule.accept(new LoggingModuleVisitor(listenerLogger));
+//                mModule.accept(new LoggingModuleVisitor(listenerLogger));
                 teamCityBuildMavenDependenciesAnalyzer.save(mModule, buildType, listenerLogger);
                 listenerLogger.completedCollectingDependencies(buildType);
             }
@@ -51,6 +52,7 @@ class CollectDependenciesRunner implements Runnable {
                 completed = true;
             }
         } catch (Exception e) {
+            isError = true;
             listenerLogger.failedCollectingDependencies(buildType, e);
             try {
                 teamCityBuildMavenDependenciesAnalyzer.saveError(buildType, listenerLogger);
@@ -74,11 +76,11 @@ class CollectDependenciesRunner implements Runnable {
 
     public CollectProgress getProgress(Integer position, String id) {
         if (position == null) {
-            return new CollectProgress(listenerLogger.getMessages(), completed, id);
+            return new CollectProgress(listenerLogger.getMessages(), completed, !isError, id);
         }
         else {
             List<LogMessage> newMessages = listenerLogger.getMessages(position);
-            return new CollectProgress(newMessages, position+newMessages.size(), completed, id);
+            return new CollectProgress(newMessages, position+newMessages.size(), completed, !isError, id);
         }
     }
 }

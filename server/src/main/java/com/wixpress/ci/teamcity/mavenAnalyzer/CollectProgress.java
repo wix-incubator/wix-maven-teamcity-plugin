@@ -15,24 +15,27 @@ public class CollectProgress {
     private int position;
     private boolean completed;
     private boolean runFound;
+    private boolean isOk;
     private String buildTypeId;
 
     public CollectProgress() {
     }
 
-    public CollectProgress(List<LogMessage> messages, boolean completed, String buildTypeId) {
+    public CollectProgress(List<LogMessage> messages, boolean completed, boolean isOk, String buildTypeId) {
         this.messages = messages;
         this.position = messages.size();
         this.completed = completed;
         this.runFound = true;
+        this.isOk = isOk;
         this.buildTypeId = buildTypeId;
     }
 
-    public CollectProgress(List<LogMessage> messages, int position, boolean completed, String buildTypeId) {
+    public CollectProgress(List<LogMessage> messages, int position, boolean completed, boolean isOk, String buildTypeId) {
         this.messages = messages;
         this.position = position;
         this.completed = completed;
         this.runFound = true;
+        this.isOk = isOk;
         this.buildTypeId = buildTypeId;
     }
 
@@ -82,5 +85,13 @@ public class CollectProgress {
 
     public void setBuildTypeId(String buildTypeId) {
         this.buildTypeId = buildTypeId;
+    }
+
+    public boolean isOk() {
+        return isOk;
+    }
+
+    public void setOk(boolean ok) {
+        isOk = ok;
     }
 }

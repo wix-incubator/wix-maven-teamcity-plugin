@@ -38,6 +38,7 @@ public class DependenciesTabExtension extends BuildTypeTab {
         try {
             DependenciesResult dependenciesResult = dependenciesAnalyzer.analyzeDependencies(buildType);
             model.put("resultType", dependenciesResult.getResultType().name());
+            model.put("buildTypeId", buildType.getBuildTypeId());
             switch (dependenciesResult.getResultType()) {
                 case current:
                 case needsRefresh:
@@ -57,6 +58,7 @@ public class DependenciesTabExtension extends BuildTypeTab {
             model.put("module", "{}");
             model.put("fullTrace", serializeException(e));
             model.put("resultType", "error");
+            model.put("buildTypeId", buildType.getBuildTypeId());
         }
     }
 

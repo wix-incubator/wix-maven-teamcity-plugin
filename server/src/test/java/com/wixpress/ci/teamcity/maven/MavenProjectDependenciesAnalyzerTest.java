@@ -110,7 +110,7 @@ public class MavenProjectDependenciesAnalyzerTest {
 
     @Test
     public void proij() throws MavenWorkspaceReaderException, ArtifactDescriptorException, IOException, DependencyCollectionException, ModelBuildingException {
-        File repositoryRoot = new File("c:/work/wix/git/tmp/wix-framework/");
+        File repositoryRoot = new File("c:/work/wix/git/tmp/wix-framework-parents-and-samples/");
         WorkspaceFilesystem workspaceFilesystem = new FSWorkspaceFilesystem(repositoryRoot);
         MavenWorkspaceReader workspaceReader =  mavenBooter.newWorkspaceReader(workspaceFilesystem, new LoggingMavenWorkspaceListener(listenerLogger));
         MavenRepositorySystemSession session = mavenBooter.newRepositorySystemSession(new LoggingTransferListener(listenerLogger), new LoggingRepositoryListener(listenerLogger));
