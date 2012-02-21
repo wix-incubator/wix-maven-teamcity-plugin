@@ -50,7 +50,7 @@
                         break;
                     case "runningAsync":
                         jQuery("#dep-message").html("<p>Dependencies collection is running...</p>");
-                        jQuery("#refreshDependencies").hide();
+                        this.startProgressPuller(buildTypeId)
                         break;
                     case "notRun":
                         jQuery("#dep-message").html("<p>Dependencies collection was not run for the current build configuration</p>");
@@ -246,6 +246,7 @@
 
             startProgressPuller: function(buildTypeId) {
                 DA.progressToken = 0;
+                jQuery("#refreshDependencies").show();
                 new PeriodicalExecuter(function(pe) {
                     new Ajax.Request("/maven-dependencies-plugin.html", {
                         method: 'get',
@@ -255,6 +256,7 @@
                             DA.appendMessages("#dep-message", transport.responseJSON.messages);
                             if (transport.responseJSON.completed) {
                                 pe.stop();
+                                jQuery("#refreshDependencies").hide();
                                 if (transport.responseJSON.ok) {
                                     DA.getDependencies(buildTypeId);
                                 }
