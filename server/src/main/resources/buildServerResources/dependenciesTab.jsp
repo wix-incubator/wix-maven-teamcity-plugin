@@ -246,7 +246,7 @@
 
             startProgressPuller: function(buildTypeId) {
                 DA.progressToken = 0;
-                jQuery("#refreshDependencies").show();
+                jQuery("#refreshDependencies").hide();
                 new PeriodicalExecuter(function(pe) {
                     new Ajax.Request("/maven-dependencies-plugin.html", {
                         method: 'get',
@@ -256,7 +256,7 @@
                             DA.appendMessages("#dep-message", transport.responseJSON.messages);
                             if (transport.responseJSON.completed) {
                                 pe.stop();
-                                jQuery("#refreshDependencies").hide();
+                                jQuery("#refreshDependencies").show();
                                 if (transport.responseJSON.ok) {
                                     DA.getDependencies(buildTypeId);
                                 }
