@@ -11,6 +11,7 @@ import org.apache.maven.model.building.ModelProcessor;
 import org.apache.maven.model.io.DefaultModelReader;
 import org.apache.maven.model.locator.DefaultModelLocator;
 import org.apache.maven.properties.internal.EnvironmentUtils;
+import org.apache.maven.repository.internal.DefaultVersionResolver;
 import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.apache.maven.repository.internal.MavenServiceLocator;
 import org.apache.maven.settings.Profile;
@@ -26,6 +27,7 @@ import org.sonatype.aether.collection.DependencySelector;
 import org.sonatype.aether.connector.file.FileRepositoryConnectorFactory;
 import org.sonatype.aether.connector.wagon.WagonProvider;
 import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
+import org.sonatype.aether.impl.VersionResolver;
 import org.sonatype.aether.repository.*;
 import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
 import org.sonatype.aether.transfer.TransferListener;
@@ -126,6 +128,7 @@ public class MavenBooter {
                 MavenServiceLocator locator = new MavenServiceLocator();
                 locator.addService( RepositoryConnectorFactory.class, FileRepositoryConnectorFactory.class );
                 locator.addService( RepositoryConnectorFactory.class, WagonRepositoryConnectorFactory.class );
+                locator.setService( VersionResolver.class, FixedDefaultVersionResolver.class);
                 locator.setServices( WagonProvider.class, new ManualWagonProvider() );
 
                 return locator.getService( RepositorySystem.class );
