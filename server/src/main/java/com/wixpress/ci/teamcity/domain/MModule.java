@@ -54,7 +54,9 @@ public class MModule extends MArtifact {
     }
 
     public String toString() {
-        return String.format("Module: %s:%s:%s", getGroupId(), getArtifactId(), getVersion());
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("MModule: %s:%s:%s{dependencies:(", getGroupId(), getArtifactId(), getVersion()));
+        return sb.toString();
     }
 
 }

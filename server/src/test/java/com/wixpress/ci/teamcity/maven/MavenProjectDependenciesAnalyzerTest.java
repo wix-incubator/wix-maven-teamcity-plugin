@@ -62,7 +62,7 @@ public class MavenProjectDependenciesAnalyzerTest {
         MavenRepositorySystemSession session = mavenBooter.newRepositorySystemSession(new LoggingTransferListener(listenerLogger), new LoggingRepositoryListener(listenerLogger));
         session.setWorkspaceReader(workspaceReader);
 
-        MModule mModule = mavenProjectDependenciesAnalyzer.getModuleDependencies(workspaceReader.getRootModule(), session);
+        MModule mModule = mavenProjectDependenciesAnalyzer.getModuleDependencies(workspaceReader.getRootModule(), session, new LoggingDependenciesAnalyzerListener(listenerLogger));
 
         assertThat(mModule, IsArtifact("com.sonatype.example", "projA", "1.0.0-SNAPSHOT"));
         assertThat(mModule.getDependencyTree(), IsArtifact("com.sonatype.example", "projA", "1.0.0-SNAPSHOT"));
@@ -80,7 +80,7 @@ public class MavenProjectDependenciesAnalyzerTest {
         MavenRepositorySystemSession session = mavenBooter.newRepositorySystemSession(new LoggingTransferListener(listenerLogger), new LoggingRepositoryListener(listenerLogger));
         session.setWorkspaceReader(workspaceReader);
 
-        MModule mModule = mavenProjectDependenciesAnalyzer.getModuleDependencies(workspaceReader.getRootModule(), session);
+        MModule mModule = mavenProjectDependenciesAnalyzer.getModuleDependencies(workspaceReader.getRootModule(), session, new LoggingDependenciesAnalyzerListener(listenerLogger));
 
         mModule.accept(new LoggingModuleVisitor(listenerLogger));
 
@@ -88,20 +88,38 @@ public class MavenProjectDependenciesAnalyzerTest {
                 dependencies(),
                 subModules(
                         IsMModule("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT", dependencies(
-                                IsMDependency("commons-io", "commons-io", "1.3.2", dependencies(
-                                        IsMDependency("junit", "junit", "3.8.1", dependencies())
-                                ))),
+                                hasItem(IsMDependency("commons-io", "commons-io", "1.3.2", dependencies(
+                                        not(hasItem(IsMDependency("junit", "junit", "3.8.1", dependencies())))
+                                )))),
                                 subModules()),
                         IsMModule("com.sonatype.example", "moduleB", "1.0.0-SNAPSHOT", dependencies(
-                                IsMDependency("org.apache.commons", "commons-skin", "3", dependencies()),
-                                IsMDependency("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT", dependencies(
-                                        IsMDependency("commons-io", "commons-io", "1.3.2", dependencies())
-                                )),
-                                IsMDependency("junit", "junit", "4.10", dependencies())
+                                hasItem(IsMDependency("org.apache.commons", "commons-skin", "3", dependencies())),
+                                hasItem(IsMDependency("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT", dependencies(
+                                        hasItem(IsMDependency("commons-io", "commons-io", "1.3.2", dependencies(
+                                                not(hasItem(IsMDependency("junit", "junit", "3.8.1", dependencies())))
+                                        )))
+                                ))),
+                                hasItem(IsMDependency("junit", "junit", "4.10", dependencies(
+                                        not(hasItem(IsMDependency("org.hamcrest", "hamcrest-core", "1.1", dependencies())))
+                                )))
                         ),
                                 subModules())
                 )
         ));
+    }
+
+    @Test
+    public void proij() throws MavenWorkspaceReaderException, ArtifactDescriptorException, IOException, DependencyCollectionException, ModelBuildingException {
+        File repositoryRoot = new File("c:/work/wix/git/tmp/wix-framework/");
+        WorkspaceFilesystem workspaceFilesystem = new FSWorkspaceFilesystem(repositoryRoot);
+        MavenWorkspaceReader workspaceReader =  mavenBooter.newWorkspaceReader(workspaceFilesystem, new LoggingMavenWorkspaceListener(listenerLogger));
+        MavenRepositorySystemSession session = mavenBooter.newRepositorySystemSession(new LoggingTransferListener(listenerLogger), new LoggingRepositoryListener(listenerLogger));
+        session.setWorkspaceReader(workspaceReader);
+
+        MModule mModule = mavenProjectDependenciesAnalyzer
+                .getModuleDependencies(workspaceReader.getRootModule(), session, new LoggingDependenciesAnalyzerListener(listenerLogger));
+
+        mModule.accept(new LoggingModuleVisitor(listenerLogger));
     }
 
     private MDependency findDependency(MModule mModule, Matcher<MDependency> matcher) {

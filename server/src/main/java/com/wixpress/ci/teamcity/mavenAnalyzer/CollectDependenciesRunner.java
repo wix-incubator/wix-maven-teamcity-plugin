@@ -3,10 +3,7 @@ package com.wixpress.ci.teamcity.mavenAnalyzer;
 import com.wixpress.ci.teamcity.dependenciesTab.CollectingMessagesListenerLogger;
 import com.wixpress.ci.teamcity.domain.LogMessage;
 import com.wixpress.ci.teamcity.domain.MModule;
-import com.wixpress.ci.teamcity.maven.listeners.LoggingMavenWorkspaceListener;
-import com.wixpress.ci.teamcity.maven.listeners.LoggingModuleVisitor;
-import com.wixpress.ci.teamcity.maven.listeners.LoggingRepositoryListener;
-import com.wixpress.ci.teamcity.maven.listeners.LoggingTransferListener;
+import com.wixpress.ci.teamcity.maven.listeners.*;
 import com.wixpress.ci.teamcity.maven.workspace.MavenWorkspaceReader;
 import com.wixpress.ci.teamcity.maven.workspace.fs.BuildTypeWorkspaceFilesystem;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -42,7 +39,8 @@ class CollectDependenciesRunner implements Runnable {
                 MavenRepositorySystemSession session = teamCityBuildMavenDependenciesAnalyzer.getMavenBooter().newRepositorySystemSession(new LoggingTransferListener(listenerLogger), new LoggingRepositoryListener(listenerLogger));
                 session.setWorkspaceReader(workspaceReader);
 
-                MModule mModule = teamCityBuildMavenDependenciesAnalyzer.getMavenDependenciesAnalyzer().getModuleDependencies(workspaceReader.getRootModule(), session);
+                MModule mModule = teamCityBuildMavenDependenciesAnalyzer.getMavenDependenciesAnalyzer()
+                        .getModuleDependencies(workspaceReader.getRootModule(), session, new LoggingDependenciesAnalyzerListener(listenerLogger));
                 mModule.accept(new LoggingModuleVisitor(listenerLogger));
                 teamCityBuildMavenDependenciesAnalyzer.save(mModule, buildType, listenerLogger);
                 listenerLogger.completedCollectingDependencies(buildType);

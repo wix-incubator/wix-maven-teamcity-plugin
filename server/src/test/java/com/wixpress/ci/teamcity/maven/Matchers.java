@@ -147,12 +147,12 @@ public class Matchers {
         return org.hamcrest.Matchers.allOf(transform);
     }
     
-    public static Matcher<Iterable<MDependency>> dependencies(Matcher<MDependency> ... items) {
-        Iterable<Matcher<? extends Iterable<MDependency>>> transform = Iterables.transform(asList(items), new Function<Matcher<MDependency>, Matcher<? extends Iterable<MDependency>>>() {
-            public Matcher<Iterable<MDependency>> apply(Matcher<MDependency> input) {
-                return hasItem(input);
-            }
-        });
-        return org.hamcrest.Matchers.allOf(transform);
+    public static Matcher<Iterable<MDependency>> dependencies(Matcher<Iterable<MDependency>> ... items) {
+//        Iterable<Matcher<? extends Iterable<MDependency>>> transform = Iterables.transform(asList(items), new Function<Matcher<MDependency>, Matcher<? extends Iterable<MDependency>>>() {
+//            public Matcher<Iterable<MDependency>> apply(Matcher<MDependency> input) {
+//                return hasItem(input);
+//            }
+//        });
+        return org.hamcrest.Matchers.allOf(items);
     }
 }

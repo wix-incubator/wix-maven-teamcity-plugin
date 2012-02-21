@@ -36,8 +36,8 @@ public class MavenProjectDependenciesAnalyzer {
         this.repositorySystem = repositorySystem;
     }
     
-    public MModule getModuleDependencies(MavenModule mavenModule, RepositorySystemSession session) throws ArtifactDescriptorException, IOException, DependencyCollectionException, ModelBuildingException {
-        ModuleDependencies moduleDependencies = doGetModuleDependencies(mavenModule, session);
+    public MModule getModuleDependencies(MavenModule mavenModule, RepositorySystemSession session, DependenciesAnalyzerListener listener) throws ArtifactDescriptorException, IOException, DependencyCollectionException, ModelBuildingException {
+        ModuleDependencies moduleDependencies = doGetModuleDependencies(mavenModule, session, listener);
         return toMModule(moduleDependencies);
         
     }
@@ -68,18 +68,17 @@ public class MavenProjectDependenciesAnalyzer {
         return mDependency;
     }
 
-    private ModuleDependencies doGetModuleDependencies(MavenModule mavenModule, RepositorySystemSession session) throws IOException, ModelBuildingException, ArtifactDescriptorException, DependencyCollectionException {
-        DependencyNode moduleDependencyTree = getDependenciesOfModule(mavenModule, session);
+    private ModuleDependencies doGetModuleDependencies(MavenModule mavenModule, RepositorySystemSession session, DependenciesAnalyzerListener listener) throws IOException, ModelBuildingException, ArtifactDescriptorException, DependencyCollectionException {
+        DependencyNode moduleDependencyTree = getDependenciesOfModule(mavenModule, session, listener);
         ModuleDependencies moduleDependencies = new ModuleDependencies(mavenModule, moduleDependencyTree);
         for (MavenModule module: mavenModule.getSubModules()) {
-            moduleDependencies.getChildModuleDependencieses().add(doGetModuleDependencies(module, session));
+            moduleDependencies.getChildModuleDependencieses().add(doGetModuleDependencies(module, session, listener));
         }
         return moduleDependencies;
     }
     
-    private DependencyNode getDependenciesOfModule(MavenModule projectModule, RepositorySystemSession session) throws ArtifactDescriptorException, DependencyCollectionException {
-        System.out.println( "------------------------------------------------------------" );
-        System.out.printf("%s:%s:%s\n", projectModule.getGroupId(), projectModule.getArtifactId(), projectModule.getVersion());
+    private DependencyNode getDependenciesOfModule(MavenModule projectModule, RepositorySystemSession session, DependenciesAnalyzerListener listener) throws ArtifactDescriptorException, DependencyCollectionException {
+        listener.collectedDependencies(projectModule);
 
         Artifact artifact = new DefaultArtifact(projectModule.getGroupId(), projectModule.getArtifactId(), "", "pom", projectModule.getVersion());
 
@@ -90,6 +89,7 @@ public class MavenProjectDependenciesAnalyzer {
 
         CollectResult collectResult = repositorySystem.collectDependencies(session, collectRequest);
 
+        listener.collectingDependencies(projectModule);
         return collectResult.getRoot();
     }
 

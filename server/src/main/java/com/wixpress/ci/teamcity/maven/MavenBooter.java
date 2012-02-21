@@ -146,7 +146,7 @@ public class MavenBooter {
         LocalRepository localRepo = new LocalRepository(settings().getLocalRepository());
         session.setLocalRepositoryManager( repositorySystem().newLocalRepositoryManager(localRepo) );
         DependencySelector depFilter =
-            new AndDependencySelector(new ScopeIncludeFirstDependencySelector("test", "provided"), new OptionalDependencySelector(), new ExclusionDependencySelector() );
+            new AndDependencySelector(new ScopeTransitiveDependencySelector("test", "provided"), new OptionalDependencySelector(), new ExclusionDependencySelector() );
         session.setDependencySelector(depFilter);
 
         session.setTransferListener( transferListener );
