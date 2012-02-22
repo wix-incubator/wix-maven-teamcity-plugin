@@ -2,9 +2,7 @@ package com.wixpress.ci.teamcity.mavenAnalyzer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.wixpress.ci.teamcity.domain.LogMessage;
-import com.wixpress.ci.teamcity.domain.LogMessageType;
-import com.wixpress.ci.teamcity.domain.MModule;
+import com.wixpress.ci.teamcity.domain.*;
 import com.wixpress.ci.teamcity.maven.MavenBooter;
 import com.wixpress.ci.teamcity.maven.MavenProjectDependenciesAnalyzer;
 import jetbrains.buildServer.serverSide.CustomDataStorage;
@@ -38,7 +36,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
     VcsRootInstance vcsRootInstance = mock(VcsRootInstance.class);
     SBuildType buildType = mock(SBuildType.class);
     CustomDataStorage customDataStorage = mock(CustomDataStorage.class);
-    TeamCityBuildMavenDependenciesAnalyzer analyzer = 
+    TeamCityBuildMavenDependenciesAnalyzer analyzer =
             new TeamCityBuildMavenDependenciesAnalyzer(mavenBooter, objectMapper, mavenProjectDependenciesAnalyzer, executor);
 
     
@@ -48,7 +46,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
         when(buildType.getCustomDataStorage(TeamCityBuildMavenDependenciesAnalyzer.DEPENDENCIES_STORAGE)).thenReturn(customDataStorage);
         when(customDataStorage.getValue(TeamCityBuildMavenDependenciesAnalyzer.BUILD_DEPENDENCIES)).thenReturn(null);
         
-        DependenciesResult result = analyzer.analyzeDependencies(buildType);
+        MavenDependenciesResult result = analyzer.analyzeDependencies(buildType);
 
         assertThat(result.getResultType(), is(ResultType.runningAsync));
         verify(executor).purgeOldRuns();
@@ -64,7 +62,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
         when(vcsRootInstance.getName()).thenReturn("vcs1");
         when(vcsRootInstance.getCurrentRevision()).thenReturn("1.2");
 
-        DependenciesResult result = analyzer.analyzeDependencies(buildType);
+        MavenDependenciesResult result = analyzer.analyzeDependencies(buildType);
 
         assertThat(result.getResultType(), is(ResultType.current));
         verify(executor, never()).execute(Matchers.<CollectDependenciesRunner>any());
@@ -79,7 +77,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
         when(vcsRootInstance.getName()).thenReturn("vcs1");
         when(vcsRootInstance.getCurrentRevision()).thenReturn("1.3");
 
-        DependenciesResult result = analyzer.analyzeDependencies(buildType);
+        MavenDependenciesResult result = analyzer.analyzeDependencies(buildType);
 
         assertThat(result.getResultType(), is(ResultType.runningAsync));
         verify(executor).execute(Matchers.<CollectDependenciesRunner>any());
@@ -94,7 +92,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
         when(vcsRootInstance.getName()).thenReturn("vcs1");
         when(vcsRootInstance.getCurrentRevision()).thenReturn("1.2");
 
-        DependenciesResult result = analyzer.getBuildDependencies(buildType);
+        MavenDependenciesResult result = analyzer.getBuildDependencies(buildType);
 
         assertThat(result.getResultType(), is(ResultType.current));
         verify(executor, never()).execute(Matchers.<CollectDependenciesRunner>any());
@@ -109,7 +107,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
         when(vcsRootInstance.getName()).thenReturn("vcs1");
         when(vcsRootInstance.getCurrentRevision()).thenReturn("1.3");
 
-        DependenciesResult result = analyzer.getBuildDependencies(buildType);
+        MavenDependenciesResult result = analyzer.getBuildDependencies(buildType);
 
         assertThat(result.getResultType(), is(ResultType.needsRefresh));
         verify(executor, never()).execute(Matchers.<CollectDependenciesRunner>any());
@@ -120,7 +118,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
         when(executor.getRunner(buildType)).thenReturn(runner);
         when(runner.isCompleted()).thenReturn(false);
 
-        DependenciesResult result = analyzer.analyzeDependencies(buildType);
+        MavenDependenciesResult result = analyzer.analyzeDependencies(buildType);
 
         assertThat(result.getResultType(), is(ResultType.runningAsync));
         verify(executor, never()).execute(Matchers.<CollectDependenciesRunner>any());
@@ -137,7 +135,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
         when(vcsRootInstance.getName()).thenReturn("vcs1");
         when(vcsRootInstance.getCurrentRevision()).thenReturn("1.2");
 
-        DependenciesResult result = analyzer.analyzeDependencies(buildType);
+        MavenDependenciesResult result = analyzer.analyzeDependencies(buildType);
 
         assertThat(result.getResultType(), is(ResultType.current));
         verify(executor, never()).execute(Matchers.<CollectDependenciesRunner>any());
@@ -150,7 +148,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
         when(buildType.getCustomDataStorage(TeamCityBuildMavenDependenciesAnalyzer.DEPENDENCIES_STORAGE)).thenReturn(customDataStorage);
         when(customDataStorage.getValue(TeamCityBuildMavenDependenciesAnalyzer.BUILD_DEPENDENCIES)).thenReturn(serializedModuleStorageWithError());
 
-        DependenciesResult result = analyzer.analyzeDependencies(buildType);
+        MavenDependenciesResult result = analyzer.analyzeDependencies(buildType);
 
         assertThat(result.getResultType(), is(ResultType.exception));
         verify(executor, never()).execute(Matchers.<CollectDependenciesRunner>any());
@@ -163,7 +161,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
         when(buildType.getCustomDataStorage(TeamCityBuildMavenDependenciesAnalyzer.DEPENDENCIES_STORAGE)).thenReturn(customDataStorage);
         when(customDataStorage.getValue(TeamCityBuildMavenDependenciesAnalyzer.BUILD_DEPENDENCIES)).thenReturn(serializedModuleStorageWithError());
 
-        DependenciesResult result = analyzer.forceAnalyzeDependencies(buildType);
+        MavenDependenciesResult result = analyzer.forceAnalyzeDependencies(buildType);
         assertThat(result.getResultType(), is(ResultType.runningAsync));
 
         verify(executor).execute(Matchers.<CollectDependenciesRunner>any());

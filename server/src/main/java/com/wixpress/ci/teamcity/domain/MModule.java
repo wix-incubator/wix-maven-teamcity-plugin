@@ -1,5 +1,7 @@
 package com.wixpress.ci.teamcity.domain;
 
+import com.google.common.collect.Iterables;
+
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -59,4 +61,11 @@ public class MModule extends MArtifact {
         return sb.toString();
     }
 
+    public Iterable<IArtifact> getChildren() {
+        List<IArtifact> children = newArrayList();
+        children.addAll(subModules);
+        if (dependencyTree != null)
+            children.addAll(dependencyTree.getDependencies());
+        return children;
+    }
 }

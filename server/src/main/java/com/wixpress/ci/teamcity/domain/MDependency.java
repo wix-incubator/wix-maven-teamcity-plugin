@@ -23,8 +23,11 @@ public class MDependency extends MArtifact {
         this.optional = optional;
     }
 
-    public MDependency(IArtifact artifact) {
+    public MDependency(MDependency artifact) {
         super(artifact);
+        this.scope = artifact.scope;
+        this.optional = artifact.optional;
+        this.dependencies.addAll(artifact.getDependencies());
     }
 
     @Override
@@ -75,7 +78,9 @@ public class MDependency extends MArtifact {
         return sb.toString();
     }
 
-
-
-
+    public Iterable<IArtifact> getChildren() {
+        List<IArtifact> children = newArrayList();
+        children.addAll(dependencies);
+        return children;
+    }
 }

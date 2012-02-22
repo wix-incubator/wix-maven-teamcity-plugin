@@ -1,6 +1,6 @@
 package com.wixpress.ci.teamcity.dependenciesTab;
 
-import com.wixpress.ci.teamcity.mavenAnalyzer.DependenciesResult;
+import com.wixpress.ci.teamcity.domain.MavenDependenciesResult;
 import com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer;
 import com.wixpress.ci.teamcity.domain.LogMessage;
 import com.wixpress.ci.teamcity.domain.LogMessageType;
@@ -36,7 +36,7 @@ public class DependenciesTabExtension extends BuildTypeTab {
     @Override
     protected void fillModel(Map model, HttpServletRequest request, @NotNull SBuildType buildType, SUser user) {
         try {
-            DependenciesResult dependenciesResult = dependenciesAnalyzer.analyzeDependencies(buildType);
+            MavenDependenciesResult dependenciesResult = dependenciesAnalyzer.analyzeDependencies(buildType);
             model.put("resultType", dependenciesResult.getResultType().name());
             model.put("buildTypeId", buildType.getBuildTypeId());
             switch (dependenciesResult.getResultType()) {

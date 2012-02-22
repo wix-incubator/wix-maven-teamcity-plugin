@@ -1,6 +1,7 @@
 package com.wixpress.ci.teamcity.mavenAnalyzer;
 
 import com.wixpress.ci.teamcity.dependenciesTab.CollectingMessagesListenerLogger;
+import com.wixpress.ci.teamcity.domain.CollectProgress;
 import com.wixpress.ci.teamcity.domain.LogMessage;
 import com.wixpress.ci.teamcity.domain.MModule;
 import com.wixpress.ci.teamcity.maven.listeners.*;
@@ -11,7 +12,6 @@ import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.joda.time.DateTime;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
 * @author yoav

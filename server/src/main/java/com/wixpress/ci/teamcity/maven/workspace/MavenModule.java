@@ -57,4 +57,11 @@ public class MavenModule implements IArtifact {
                 .append(" defined at [").append(pomFile).append("]]");
         return sb.toString();
     }
+
+    public Iterable<IArtifact> getChildren() {
+        List<IArtifact> children = newArrayList();
+        children.addAll(subModules);
+        return children;
+    }
+
 }

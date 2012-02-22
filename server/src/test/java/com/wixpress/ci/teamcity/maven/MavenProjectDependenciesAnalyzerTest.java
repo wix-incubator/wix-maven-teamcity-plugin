@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.wixpress.ci.teamcity.maven.Matchers.*;
-import static com.wixpress.ci.teamcity.maven.Matchers.subModules;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
@@ -84,28 +83,32 @@ public class MavenProjectDependenciesAnalyzerTest {
 
         mModule.accept(new LoggingModuleVisitor(listenerLogger));
 
-        assertThat(mModule, IsMModule("com.sonatype.example", "projB", "1.0.0-SNAPSHOT",
-                dependencies(),
-                subModules(
-                        IsMModule("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT", dependencies(
-                                hasItem(IsMDependency("commons-io", "commons-io", "1.3.2", dependencies(
-                                        not(hasItem(IsMDependency("junit", "junit", "3.8.1", dependencies())))
-                                )))),
-                                subModules()),
-                        IsMModule("com.sonatype.example", "moduleB", "1.0.0-SNAPSHOT", dependencies(
-                                hasItem(IsMDependency("org.apache.commons", "commons-skin", "3", dependencies())),
-                                hasItem(IsMDependency("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT", dependencies(
-                                        hasItem(IsMDependency("commons-io", "commons-io", "1.3.2", dependencies(
-                                                not(hasItem(IsMDependency("junit", "junit", "3.8.1", dependencies())))
-                                        )))
-                                ))),
-                                hasItem(IsMDependency("junit", "junit", "4.10", dependencies(
-                                        not(hasItem(IsMDependency("org.hamcrest", "hamcrest-core", "1.1", dependencies())))
-                                )))
-                        ),
-                                subModules())
-                )
-        ));
+        assertThat(mModule, IsModule("com.sonatype.example", "projB", "1.0.0-SNAPSHOT"));
+        assertThat(mModule, ArtifactTreeMatcher()
+                .match(IsModule("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT")));
+        assertThat(mModule, ArtifactTreeMatcher()
+                .get(IsArtifact("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT"))
+                .match(IsMDependency("commons-io", "commons-io", "1.3.2")));
+        assertThat(mModule, ArtifactTreeMatcher()
+                .get(IsArtifact("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT"))
+                .get(IsArtifact("commons-io", "commons-io", "1.3.2"))
+                .notMatch(IsMDependency("junit", "junit", "3.8.1")));
+
+        assertThat(mModule, ArtifactTreeMatcher()
+                .get(IsArtifact("com.sonatype.example", "moduleB", "1.0.0-SNAPSHOT"))
+                .match(IsMDependency("org.apache.commons", "commons-skin", "3")));
+
+        assertThat(mModule, ArtifactTreeMatcher()
+                .get(IsArtifact("com.sonatype.example", "moduleB", "1.0.0-SNAPSHOT"))
+                .get(IsArtifact("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT"))
+                .get(IsArtifact("commons-io", "commons-io", "1.3.2"))
+                .notMatch(IsMDependency("junit", "junit", "3.8.1")));
+
+        assertThat(mModule, ArtifactTreeMatcher()
+                .get(IsArtifact("com.sonatype.example", "moduleB", "1.0.0-SNAPSHOT"))
+                .get(IsArtifact("junit", "junit", "4.10"))
+                .notMatch(IsMDependency("org.hamcrest", "hamcrest-core", "1.1")));
+
     }
 
 }

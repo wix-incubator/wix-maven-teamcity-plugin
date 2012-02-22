@@ -1,5 +1,6 @@
 package com.wixpress.ci.teamcity.dependenciesTab;
 
+import com.wixpress.ci.teamcity.DependenciesAnalyzer;
 import com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.serverSide.ProjectManager;
@@ -21,7 +22,7 @@ import java.util.Map;
  */
 public class DependenciesTabAjaxController extends BaseController {
     private final WebControllerManager myManager;
-    private final TeamCityBuildMavenDependenciesAnalyzer dependenciesAnalyzer;
+    private final DependenciesAnalyzer dependenciesAnalyzer;
     private final ProjectManager projectManager;
     private final ObjectMapper objectMapper;
     private final Map<String, Action> actions = new HashMap<String, Action>();

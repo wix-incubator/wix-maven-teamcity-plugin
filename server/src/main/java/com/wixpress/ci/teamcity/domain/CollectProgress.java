@@ -1,4 +1,4 @@
-package com.wixpress.ci.teamcity.mavenAnalyzer;
+package com.wixpress.ci.teamcity.domain;
 
 import com.wixpress.ci.teamcity.domain.LogMessage;
 

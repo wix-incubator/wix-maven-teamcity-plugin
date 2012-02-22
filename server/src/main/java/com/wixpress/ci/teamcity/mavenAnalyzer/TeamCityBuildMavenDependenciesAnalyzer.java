@@ -1,10 +1,10 @@
 package com.wixpress.ci.teamcity.mavenAnalyzer;
 
 import com.wixpress.ci.teamcity.dependenciesTab.CollectingMessagesListenerLogger;
-import com.wixpress.ci.teamcity.domain.LogMessage;
-import com.wixpress.ci.teamcity.domain.MModule;
+import com.wixpress.ci.teamcity.domain.*;
 import com.wixpress.ci.teamcity.maven.MavenBooter;
 import com.wixpress.ci.teamcity.maven.MavenProjectDependenciesAnalyzer;
+import com.wixpress.ci.teamcity.DependenciesAnalyzer;
 import jetbrains.buildServer.serverSide.CustomDataStorage;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.vcs.VcsException;
@@ -24,7 +24,7 @@ import static com.google.common.collect.Maps.newHashMap;
  * @author yoav
  * @since 2/16/12
  */
-public class TeamCityBuildMavenDependenciesAnalyzer {
+public class TeamCityBuildMavenDependenciesAnalyzer implements DependenciesAnalyzer<MavenDependenciesResult> {
 
     public static final String DEPENDENCIES_STORAGE = "com.wixpress.dependencies-storage";
     public static final String BUILD_DEPENDENCIES = "build-dependencies";
@@ -47,7 +47,7 @@ public class TeamCityBuildMavenDependenciesAnalyzer {
      * @param buildType build type for which to get the dependencies
      * @return dependencies result
      */
-    public DependenciesResult getBuildDependencies(SBuildType buildType) {
+    public MavenDependenciesResult getBuildDependencies(SBuildType buildType) {
         return getBuildDependencies(buildType, false);
     }
 
@@ -56,34 +56,34 @@ public class TeamCityBuildMavenDependenciesAnalyzer {
      * @param buildType build type for which to get the dependencies
      * @return dependencies result
      */
-    public DependenciesResult analyzeDependencies(SBuildType buildType) {
+    public MavenDependenciesResult analyzeDependencies(SBuildType buildType) {
         return getBuildDependencies(buildType, true);
     }
 
-    public DependenciesResult forceAnalyzeDependencies(SBuildType buildType) {
+    public MavenDependenciesResult forceAnalyzeDependencies(SBuildType buildType) {
         CollectDependenciesRunner runner = executor.getRunner(buildType);
         if (runner != null && !runner.isCompleted())
-            return new DependenciesResult(ResultType.runningAsync);
+            return new MavenDependenciesResult(ResultType.runningAsync);
         else {
             collectDependencies(buildType);
-            return new DependenciesResult(ResultType.runningAsync);
+            return new MavenDependenciesResult(ResultType.runningAsync);
         }
     }
     
-    private DependenciesResult getBuildDependencies(SBuildType buildType, boolean refreshIfNeeded) {
+    private MavenDependenciesResult getBuildDependencies(SBuildType buildType, boolean refreshIfNeeded) {
         CollectDependenciesRunner runner = executor.getRunner(buildType);
         if (runner != null) {
             if (runner.isCompleted())
                 return load(buildType, false);
             else
-                return new DependenciesResult(ResultType.runningAsync);
+                return new MavenDependenciesResult(ResultType.runningAsync);
         }
         else {
-            DependenciesResult dependenciesResult = load(buildType, true);
+            MavenDependenciesResult dependenciesResult = load(buildType, true);
             if ((refreshIfNeeded && (dependenciesResult.getResultType() == ResultType.needsRefresh)) ||
                     (dependenciesResult.getResultType() == ResultType.notRun)) {
                 collectDependencies(buildType);
-                return new DependenciesResult(ResultType.runningAsync);
+                return new MavenDependenciesResult(ResultType.runningAsync);
             }
             else
                 return dependenciesResult;
@@ -115,23 +115,23 @@ public class TeamCityBuildMavenDependenciesAnalyzer {
         executor.execute(runner);
     }
 
-    private DependenciesResult load(SBuildType buildType, boolean checkIfRefreshNeeded) {
+    private MavenDependenciesResult load(SBuildType buildType, boolean checkIfRefreshNeeded) {
         CustomDataStorage customDataStorage = buildType.getCustomDataStorage(DEPENDENCIES_STORAGE);
         String serialized = customDataStorage.getValue(BUILD_DEPENDENCIES);
         if (serialized == null)
-            return new DependenciesResult(ResultType.notRun);
+            return new MavenDependenciesResult(ResultType.notRun);
         try {
             ModuleStorage moduleStorage = objectMapper.readValue(serialized, ModuleStorage.class);
             if (moduleStorage.isException)
-                return new DependenciesResult(moduleStorage.getMessages());
+                return new MavenDependenciesResult(moduleStorage.getMessages());
             if (checkIfRefreshNeeded && hasNewerVcsRevision(moduleStorage.getVcsRevisions(), getBuildVcsRevisions(buildType)))
-                return new DependenciesResult(ResultType.needsRefresh, moduleStorage.getModule());
+                return new MavenDependenciesResult(ResultType.needsRefresh, moduleStorage.getModule());
             else
-                return new DependenciesResult(moduleStorage.getModule());
+                return new MavenDependenciesResult(moduleStorage.getModule());
         } catch (IOException e) {
-            return new DependenciesResult(e);
+            return new MavenDependenciesResult(e);
         } catch (VcsException e) {
-            return new DependenciesResult(e);
+            return new MavenDependenciesResult(e);
         }
     }
 
