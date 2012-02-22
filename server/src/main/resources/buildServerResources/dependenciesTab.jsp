@@ -72,12 +72,14 @@
 
                 var html = "";
                 if (module.dependencyTree && module.dependencyTree.dependencies && module.dependencyTree.dependencies.length > 0) {
+                    module.dependencyTree.dependencies.sort(this.compareDependencies);
                     html += "<div class=\'module-dependencies\'>";
                     for (var d =0; d < module.dependencyTree.dependencies.length; d++) {
                         html += this.renderDependency(module.dependencyTree.dependencies[d])
                     }
                     html += "</div>";
                 }
+                module.subModules.sort(this.compareModules);
                 for (var m=0; m < module.subModules.length; m++) {
                     html += this.renderModule(module.subModules[m])
                 }
@@ -88,10 +90,19 @@
                         html, isOpen, hasChildren);
             },
 
+            compareModules: function (moduleA, moduleB){
+                var groupCompare = moduleA.groupId.localeCompare(moduleB.groupId);
+                if (groupCompare == 0)
+                    return moduleA.artifactId.localeCompare(moduleB.artifactId);
+                else
+                    return groupCompare;
+            },
+
             renderDependency: function (dependency) {
                 var hasChildren = (dependency.dependencies && dependency.dependencies.length > 0);
                 var html = "";
                 if (dependency.dependencies) {
+                    dependency.dependencies.sort(this.compareDependencies);
                     for (var d = 0; d <dependency.dependencies.length; d++) {
                         html += this.renderDependency(dependency.dependencies[d])
                     }
@@ -105,6 +116,20 @@
                                 "<span class='tree-text'> " + dependency.groupId + ":" + dependency.artifactId + ":" + dependency.version + "</span>"
                         ,
                         html, false, hasChildren);
+            },
+
+            compareDependencies: function (depA, depB) {
+                var moduleCompare = (depA.isModule == depB.isModule)?0:(depA.isModule)?-1:1;
+                var scopeCompare = depA.scope.localeCompare(depB.scope);
+                var groupCompare = depA.groupId.localeCompare(depB.groupId);
+                if (moduleCompare != 0)
+                    return moduleCompare;
+                else if (scopeCompare != 0)
+                    return scopeCompare;
+                else if (groupCompare != 0)
+                    return groupCompare;
+                else
+                    return depA.artifactId.localeCompare(depB.artifactId);
             },
 
             renderNode: function(nodeHtml, childrenHtml, isOpen, hasChildren) {
