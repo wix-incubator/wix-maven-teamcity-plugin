@@ -4,9 +4,8 @@
 <beans default-autowire="constructor">
     <!-- the GUI -->
     <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabAjaxController" init-method="register"/>
-    <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabExtension">
-
-    </bean>
+    <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabExtension"></bean>
+    <bean class="com.wixpress.ci.teamcity.dependenciesTab.TeamCityEventsListener"/>
     <!-- the analyzers -->
     <bean id="objectMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
     <bean id="mavenBooter" class="com.wixpress.ci.teamcity.maven.MavenBooter"/>
