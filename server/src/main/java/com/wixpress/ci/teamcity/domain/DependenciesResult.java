@@ -10,4 +10,5 @@ public interface DependenciesResult {
     public ResultType getResultType();
     public List<LogMessage> getFullTrace();
 
+    MModule getModule();
 }

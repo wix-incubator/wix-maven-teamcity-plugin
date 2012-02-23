@@ -2,6 +2,7 @@ package com.wixpress.ci.teamcity.dependenciesTab;
 
 import com.wixpress.ci.teamcity.DependenciesAnalyzer;
 import com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer;
+import com.wixpress.ci.teamcity.teamCityAnalyzer.TeamCityBuildDependenciesAnalyzer;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildServer;
@@ -29,7 +30,7 @@ public class DependenciesTabAjaxController extends BaseController {
 
     public DependenciesTabAjaxController(SBuildServer server, WebControllerManager myManager,
                                          final ProjectManager projectManager,
-                                         final TeamCityBuildMavenDependenciesAnalyzer dependenciesAnalyzer,
+                                         final TeamCityBuildDependenciesAnalyzer dependenciesAnalyzer,
                                          final ObjectMapper objectMapper) {
         super(server);
         this.myManager = myManager;
@@ -57,7 +58,7 @@ public class DependenciesTabAjaxController extends BaseController {
         myManager.registerController("/maven-dependencies-plugin.html", this);
     }
 
-    private void registerGetBuildDependencies(final ProjectManager projectManager, final TeamCityBuildMavenDependenciesAnalyzer dependenciesAnalyzer) {
+    private void registerGetBuildDependencies(final ProjectManager projectManager, final DependenciesAnalyzer dependenciesAnalyzer) {
         actions.put("getBuildDependencies", new Action() {
             @Override
             Object doHandle(HttpServletRequest request) throws IOException {
@@ -71,7 +72,7 @@ public class DependenciesTabAjaxController extends BaseController {
         });
     }
 
-    private void registerForceAnalyzeDependencies(final ProjectManager projectManager, final TeamCityBuildMavenDependenciesAnalyzer dependenciesAnalyzer) {
+    private void registerForceAnalyzeDependencies(final ProjectManager projectManager, final DependenciesAnalyzer dependenciesAnalyzer) {
         actions.put("forceAnalyzeDependencies", new Action() {
             @Override
             Object doHandle(HttpServletRequest request) throws IOException {
@@ -85,7 +86,7 @@ public class DependenciesTabAjaxController extends BaseController {
         });
     }
 
-    private void registerProgressOperation(final TeamCityBuildMavenDependenciesAnalyzer dependenciesAnalyzer) {
+    private void registerProgressOperation(final DependenciesAnalyzer dependenciesAnalyzer) {
         actions.put("progress", new Action() {
             @Override
             Object doHandle(HttpServletRequest request) throws IOException {

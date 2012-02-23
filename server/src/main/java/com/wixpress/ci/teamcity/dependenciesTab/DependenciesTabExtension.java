@@ -1,9 +1,12 @@
 package com.wixpress.ci.teamcity.dependenciesTab;
 
+import com.wixpress.ci.teamcity.DependenciesAnalyzer;
+import com.wixpress.ci.teamcity.domain.DependenciesResult;
 import com.wixpress.ci.teamcity.domain.MavenDependenciesResult;
 import com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer;
 import com.wixpress.ci.teamcity.domain.LogMessage;
 import com.wixpress.ci.teamcity.domain.LogMessageType;
+import com.wixpress.ci.teamcity.teamCityAnalyzer.TeamCityBuildDependenciesAnalyzer;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.users.SUser;
@@ -24,10 +27,10 @@ import static com.google.common.collect.Lists.newArrayList;
  */
 public class DependenciesTabExtension extends BuildTypeTab {
 
-    private TeamCityBuildMavenDependenciesAnalyzer dependenciesAnalyzer;
+    private DependenciesAnalyzer dependenciesAnalyzer;
     private final ObjectMapper objectMapper;
 
-    public DependenciesTabExtension(WebControllerManager manager, ProjectManager projectManager, TeamCityBuildMavenDependenciesAnalyzer dependenciesAnalyzer, ObjectMapper objectMapper) {
+    public DependenciesTabExtension(WebControllerManager manager, ProjectManager projectManager, TeamCityBuildDependenciesAnalyzer dependenciesAnalyzer, ObjectMapper objectMapper) {
         super("wix-maven-3-teamcity-plugin", "Maven 3 Dependencies", manager, projectManager, "dependenciesTab.jsp");
         this.dependenciesAnalyzer = dependenciesAnalyzer;
         this.objectMapper = objectMapper;
@@ -36,7 +39,7 @@ public class DependenciesTabExtension extends BuildTypeTab {
     @Override
     protected void fillModel(Map model, HttpServletRequest request, @NotNull SBuildType buildType, SUser user) {
         try {
-            MavenDependenciesResult dependenciesResult = dependenciesAnalyzer.analyzeDependencies(buildType);
+            DependenciesResult dependenciesResult = dependenciesAnalyzer.analyzeDependencies(buildType);
             model.put("resultType", dependenciesResult.getResultType().name());
             model.put("buildTypeId", buildType.getBuildTypeId());
             switch (dependenciesResult.getResultType()) {

@@ -4,7 +4,9 @@
 <beans default-autowire="constructor">
     <!-- the GUI -->
     <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabAjaxController" init-method="register"/>
-    <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabExtension"/>
+    <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabExtension">
+
+    </bean>
     <!-- the analyzers -->
     <bean id="objectMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
     <bean id="mavenBooter" class="com.wixpress.ci.teamcity.maven.MavenBooter"/>
@@ -15,10 +17,16 @@
         <constructor-arg index="1" ref="repositorySystem"/>
     </bean>
     <bean id="executor" class="com.wixpress.ci.teamcity.mavenAnalyzer.CollectDependenciesExecutor" destroy-method="shutdown"/>
-    <bean class="com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer">
+    <bean id="mavenDependenciesAnalyzer" class="com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer">
         <constructor-arg ref="mavenBooter"/>
         <constructor-arg ref="objectMapper"/>
         <constructor-arg ref="mavenProjectDependenciesAnalyzer"/>
         <constructor-arg ref="executor"/>
     </bean>
+
+    <bean class="com.wixpress.ci.teamcity.teamCityAnalyzer.TeamCityBuildDependenciesAnalyzer">
+        <constructor-arg ref="mavenDependenciesAnalyzer"/>
+        <constructor-arg ref="projectManager"/>
+    </bean>
+
 </beans>

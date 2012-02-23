@@ -19,6 +19,7 @@
     .test {font-size:10px; color:#5229A3;background-color: #E0D5F9; border:solid #5229A3 1px; display:inline-block;border-radius: 4px; padding:0 3px;}
     .provided {font-size:10px; color:#666;background-color: #ddd; border:solid #666 1px; display:inline-block;border-radius: 4px; padding:0 3px;}
     .optional {font-size:10px; color:#5A6986;background-color: #DEE5F2; border:solid #5A6986 1px; display:inline-block;border-radius: 4px; padding:0 3px;}
+    .build-type-label {font-size:10px; color: #274c85;background-color: #DEE5F2; border:solid #274c85 1px; display:inline-block;border-radius: 4px; padding:0 3px;}
     .groupBox{padding: 4px 0 0 5px}
     .module-dependencies-div{padding: 10px}
 
@@ -113,6 +114,7 @@
                                 (dependency.scope=="test"?" <div class=\'test\'> test </div>":"") +
                                 (dependency.scope=="provided"?" <div class=\'provided\'> provided </div>":"") +
                                 (dependency.scope=="isOptional"?" <div class=\'optional\'> optional </div>":"") +
+                                ((dependency.name && !dependency.isModule)?" <div class=\'build-type-label\'> "+dependency.projectName+":"+dependency.name+" </div>":"") +
                                 "<span class='tree-text'> " + dependency.groupId + ":" + dependency.artifactId + ":" + dependency.version + "</span>"
                         ,
                         html, false, hasChildren);
