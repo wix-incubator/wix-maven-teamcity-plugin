@@ -1,10 +1,7 @@
 package com.wixpress.ci.teamcity.teamCityAnalyzer;
 
 import com.google.common.collect.ImmutableList;
-import com.wixpress.ci.teamcity.domain.BuildDependenciesResult;
-import com.wixpress.ci.teamcity.domain.MDependency;
-import com.wixpress.ci.teamcity.domain.MModule;
-import com.wixpress.ci.teamcity.domain.MavenDependenciesResult;
+import com.wixpress.ci.teamcity.domain.*;
 import com.wixpress.ci.teamcity.mavenAnalyzer.MavenBuildTypeDependenciesAnalyzer;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -47,21 +44,21 @@ public class BuildTypeDependenciesDecoratorTest {
         BuildDependenciesResult result = analyzer.decorateWithBuildTypesAnalysis(mavenDependenciesResult, build3);
         
         assertThat(result.getModule(), IsModule("com.wixpress", "C5", "5"));
-        assertThat(result.getModule(), ArtifactTreeMatcher()
+        assertThat(result.getModule(), new ArtifactTreeMatcher<IArtifact>()
                 .match(IsModule("com.wixpress", "C3", "3")));
-        assertThat(result.getModule(), ArtifactTreeMatcher()
+        assertThat(result.getModule(), new ArtifactTreeMatcher<IArtifact>()
                 .get(IsArtifact("com.wixpress", "C3", "3"))
                 .match(IsMBuildTypeDependency("com.wixpress", "B2", "2", "proj2", "build2", "p2", "b2")));
-        assertThat(result.getModule(), ArtifactTreeMatcher()
+        assertThat(result.getModule(), new ArtifactTreeMatcher<IArtifact>()
                 .get(IsArtifact("com.wixpress", "C3", "3"))
                 .get(IsArtifact("com.wixpress", "B2", "2"))
                 .match(IsMBuildTypeDependency("com.wixpress", "A", "1", "proj1", "build1", "p1", "b1")));
-        assertThat(result.getModule(), ArtifactTreeMatcher()
+        assertThat(result.getModule(), new ArtifactTreeMatcher<IArtifact>()
                 .match(IsModule("com.wixpress", "C4", "4")));
-        assertThat(result.getModule(), ArtifactTreeMatcher()
+        assertThat(result.getModule(), new ArtifactTreeMatcher<IArtifact>()
                 .get(IsArtifact("com.wixpress", "C4", "4"))
                 .match(IsMDependency("com.wixpress", "C3", "3")));
-        assertThat(result.getModule(), ArtifactTreeMatcher()
+        assertThat(result.getModule(), new ArtifactTreeMatcher<IArtifact>()
                 .get(IsArtifact("com.wixpress", "C4", "4"))
                 .get(IsArtifact("com.wixpress", "C3", "3"))
                 .match(IsMBuildTypeDependency("com.wixpress", "B2", "2", "proj2", "build2", "p2", "b2")));

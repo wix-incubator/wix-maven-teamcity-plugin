@@ -61,7 +61,7 @@ public class MModule extends MArtifact {
         return sb.toString();
     }
 
-    public Iterable<IArtifact> getChildren() {
+    public List<IArtifact> getChildren() {
         List<IArtifact> children = newArrayList();
         children.addAll(subModules);
         if (dependencyTree != null)

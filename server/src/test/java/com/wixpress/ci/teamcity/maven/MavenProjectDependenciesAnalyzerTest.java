@@ -1,5 +1,6 @@
 package com.wixpress.ci.teamcity.maven;
 
+import com.wixpress.ci.teamcity.domain.IArtifact;
 import com.wixpress.ci.teamcity.domain.MDependency;
 import com.wixpress.ci.teamcity.domain.MModule;
 import com.wixpress.ci.teamcity.maven.listeners.*;
@@ -84,27 +85,27 @@ public class MavenProjectDependenciesAnalyzerTest {
         mModule.accept(new LoggingModuleVisitor(listenerLogger));
 
         assertThat(mModule, IsModule("com.sonatype.example", "projB", "1.0.0-SNAPSHOT"));
-        assertThat(mModule, ArtifactTreeMatcher()
+        assertThat(mModule, new ArtifactTreeMatcher<IArtifact>()
                 .match(IsModule("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT")));
-        assertThat(mModule, ArtifactTreeMatcher()
+        assertThat(mModule, new ArtifactTreeMatcher<IArtifact>()
                 .get(IsArtifact("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT"))
                 .match(IsMDependency("commons-io", "commons-io", "1.3.2")));
-        assertThat(mModule, ArtifactTreeMatcher()
+        assertThat(mModule, new ArtifactTreeMatcher<IArtifact>()
                 .get(IsArtifact("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT"))
                 .get(IsArtifact("commons-io", "commons-io", "1.3.2"))
                 .notMatch(IsMDependency("junit", "junit", "3.8.1")));
 
-        assertThat(mModule, ArtifactTreeMatcher()
+        assertThat(mModule, new ArtifactTreeMatcher<IArtifact>()
                 .get(IsArtifact("com.sonatype.example", "moduleB", "1.0.0-SNAPSHOT"))
                 .match(IsMDependency("org.apache.commons", "commons-skin", "3")));
 
-        assertThat(mModule, ArtifactTreeMatcher()
+        assertThat(mModule, new ArtifactTreeMatcher<IArtifact>()
                 .get(IsArtifact("com.sonatype.example", "moduleB", "1.0.0-SNAPSHOT"))
                 .get(IsArtifact("com.sonatype.example", "moduleA", "1.0.0-SNAPSHOT"))
                 .get(IsArtifact("commons-io", "commons-io", "1.3.2"))
                 .notMatch(IsMDependency("junit", "junit", "3.8.1")));
 
-        assertThat(mModule, ArtifactTreeMatcher()
+        assertThat(mModule, new ArtifactTreeMatcher<IArtifact>()
                 .get(IsArtifact("com.sonatype.example", "moduleB", "1.0.0-SNAPSHOT"))
                 .get(IsArtifact("junit", "junit", "4.10"))
                 .notMatch(IsMDependency("org.hamcrest", "hamcrest-core", "1.1")));

@@ -1,9 +1,6 @@
 package com.wixpress.ci.teamcity.maven;
 
-import com.wixpress.ci.teamcity.domain.IArtifact;
-import com.wixpress.ci.teamcity.domain.MBuildTypeDependency;
-import com.wixpress.ci.teamcity.domain.MDependency;
-import com.wixpress.ci.teamcity.domain.MModule;
+import com.wixpress.ci.teamcity.domain.*;
 import com.wixpress.ci.teamcity.maven.workspace.MavenModule;
 import org.hamcrest.*;
 import org.sonatype.aether.graph.DependencyNode;
@@ -68,43 +65,40 @@ public class Matchers {
         return IsArtifact(groupId, artifactId, version);
     }
     
-    public static ArtifactTreeMatcher ArtifactTreeMatcher() {
-        return new ArtifactTreeMatcher();
-    }
-    public static class ArtifactTreeMatcher {
-        private List<Matcher<? extends IArtifact>> treeMatchers = newArrayList();
+    public static class ArtifactTreeMatcher<T extends Tree<T>> {
+        private List<Matcher<T>> treeMatchers = newArrayList();
 
-        public ArtifactTreeMatcher get(final Matcher<? extends IArtifact> artifactMatcher) {
+        public ArtifactTreeMatcher<T> get(final Matcher<T> artifactMatcher) {
             treeMatchers.add(artifactMatcher);
             return this;
         }
 
-        public Matcher<MModule> match(final Matcher<? extends IArtifact> leafMatcher) {
+        public Matcher<T> match(final Matcher<? extends T> leafMatcher) {
             return new ArtifactTreeMatcher2(leafMatcher, true);
         }
 
-        public Matcher<MModule> notMatch(final Matcher<? extends IArtifact> leafMatcher) {
+        public Matcher<T> notMatch(final Matcher<? extends T> leafMatcher) {
             return new ArtifactTreeMatcher2(leafMatcher, false);
         }
 
-        private class ArtifactTreeMatcher2 extends TypeSafeMatcher<MModule> {
-            private final Matcher<? extends IArtifact> leafMatcher;
+        private class ArtifactTreeMatcher2 extends TypeSafeMatcher<T> {
+            private final Matcher<? extends T> leafMatcher;
             private final boolean positive;
 
-            public ArtifactTreeMatcher2(Matcher<? extends IArtifact> leafMatcher, boolean positive) {
+            public ArtifactTreeMatcher2(Matcher<? extends T> leafMatcher, boolean positive) {
                 this.leafMatcher = leafMatcher;
                 this.positive = positive;
             }
 
             @Override
-            public boolean matchesSafely(MModule item) {
-                IArtifact leaf = findLeaf(treeMatchers, item);
+            public boolean matchesSafely(T item) {
+                T leaf = findLeaf(treeMatchers, item);
                 return leaf != null && hasItem(leafMatcher).matches(leaf.getChildren()) == positive;
             }
 
-            private IArtifact findLeaf(List<Matcher<? extends IArtifact>> treeMatchers, IArtifact item) {
-                IArtifact subModule = item;
-                for (Matcher<? extends IArtifact> treeMatcher: treeMatchers) {
+            private T findLeaf(List<Matcher<T>> treeMatchers, T item) {
+                T subModule = item;
+                for (Matcher<T> treeMatcher: treeMatchers) {
                     subModule = findChild(subModule, treeMatcher);
                     if (subModule == null)
                         return null;
@@ -113,8 +107,8 @@ public class Matchers {
                 return subModule;
             }
 
-            private IArtifact findChild(IArtifact branch, Matcher<? extends IArtifact> treeMatcher) {
-                for (IArtifact subModule: branch.getChildren())
+            private T findChild(T branch, Matcher<T> treeMatcher) {
+                for (T subModule: branch.getChildren())
                     if (treeMatcher.matches(subModule)) {
                         return subModule;
                     }
@@ -122,9 +116,9 @@ public class Matchers {
             }
 
             public void describeTo(Description description) {
-                description.appendText("ArtifactTreeMatcher\n");
+                description.appendText("Tree Matcher - children path\n");
                 String ident = "\t";
-                for (Matcher<? extends IArtifact> branch: treeMatchers) {
+                for (Matcher<T> branch: treeMatchers) {
                     description.appendText(ident).appendDescriptionOf(branch).appendText("\n");
                     ident += "\t";
                 }
@@ -174,10 +168,10 @@ public class Matchers {
                     boolean match = match(groupId, mavenModule.getGroupId(), "groupId", this) &&
                             match(artifactId, mavenModule.getArtifactId(), "artifactId", this) &&
                             match(version, mavenModule.getVersion(), "version", this) &&
-                            match(name, buildTypeDependency.getName(), "name", this) &&
-                            match(projectName, buildTypeDependency.getProjectName(), "projectName", this) &&
-                            match(buildTypeId, buildTypeDependency.getBuildTypeId(), "buildTypeId", this) &&
-                            match(projectId, buildTypeDependency.getProjectId(), "projectId", this) ;
+                            match(name, buildTypeDependency.getBuildTypeId().getName(), "name", this) &&
+                            match(projectName, buildTypeDependency.getBuildTypeId().getProjectName(), "projectName", this) &&
+                            match(buildTypeId, buildTypeDependency.getBuildTypeId().getBuildTypeId(), "buildTypeId", this) &&
+                            match(projectId, buildTypeDependency.getBuildTypeId().getProjectId(), "projectId", this) ;
                     if (!match)
                         System.out.println("failed match on:" + StringDescription.asString(this));
                     return match;
@@ -207,6 +201,31 @@ public class Matchers {
             }
         };
     }
+    
+    public static Matcher<MBuildType> IsMBuildType(final String name, final String projectName, final String buildTypeId, final String projectId) {
+        return new TypeSafeMatcher<MBuildType>() {
+            @Override
+            public boolean matchesSafely(MBuildType item) {
+                return item.getBuildTypeId().equals(buildTypeId) &&
+                        item.getName().equals(name) &&
+                        item.getProjectId().equals(projectId) &&
+                        item.getProjectName().equals(projectName);
+            }
+
+            public void describeTo(Description description) {
+                description.appendText("MBuildType(")
+                        .appendText(projectName)
+                        .appendText(":")
+                        .appendText(name)
+                        .appendText("(")
+                        .appendText(projectId)
+                        .appendText("-")
+                        .appendText(buildTypeId)
+                        .appendText(")")
+                ;
+            }
+        };
+    }
 
     private static <V> boolean match(V value, V toValue, String field, SelfDescribing parentMatcher) {
         boolean match = value.equals(toValue);
@@ -215,12 +234,4 @@ public class Matchers {
         return match;
     }
 
-    private static <V> boolean match(Matcher<V> value, V toValue, String field, SelfDescribing parentMatcher) {
-        boolean match = value.matches(toValue);
-        if (!match)
-            System.out.println(String.format("failed match [%s=%s] on [%s]", field, value, StringDescription.asString(parentMatcher)));
-        return match;
-    }
-    
-    
 }

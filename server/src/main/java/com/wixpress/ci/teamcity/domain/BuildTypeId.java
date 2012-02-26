@@ -12,11 +12,21 @@ public class BuildTypeId {
     private String buildTypeId;
     private String projectId;
 
+    public BuildTypeId() {
+    }
+
     public BuildTypeId(SBuildType buildType) {
         this.name = buildType.getName();
         this.buildTypeId = buildType.getBuildTypeId();
         this.projectId = buildType.getProjectId();
         this.projectName = buildType.getProjectName();
+    }
+
+    public BuildTypeId(String name, String projectName, String buildTypeId, String projectId) {
+        this.name = name;
+        this.projectName = projectName;
+        this.buildTypeId = buildTypeId;
+        this.projectId = projectId;
     }
 
     @Override

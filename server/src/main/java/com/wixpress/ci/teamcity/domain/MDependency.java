@@ -78,7 +78,7 @@ public class MDependency extends MArtifact {
         return sb.toString();
     }
 
-    public Iterable<IArtifact> getChildren() {
+    public List<IArtifact> getChildren() {
         List<IArtifact> children = newArrayList();
         children.addAll(dependencies);
         return children;

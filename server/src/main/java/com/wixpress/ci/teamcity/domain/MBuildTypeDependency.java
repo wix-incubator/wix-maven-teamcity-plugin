@@ -18,6 +18,11 @@ public class MBuildTypeDependency extends MDependency {
         this.buildTypeId = buildTypeId;
     }
 
+    public MBuildTypeDependency(String groupId, String artifactId, String version, String scope, boolean optional, String name, String projectName, String buildTypeId, String projectId) {
+        super(groupId, artifactId, version, scope, optional);
+        this.buildTypeId = new BuildTypeId(name, projectName, buildTypeId, projectId);
+    }
+
     public BuildTypeId getBuildTypeId() {
         return buildTypeId;
     }

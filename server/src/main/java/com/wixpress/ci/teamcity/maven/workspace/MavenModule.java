@@ -58,7 +58,7 @@ public class MavenModule implements IArtifact {
         return sb.toString();
     }
 
-    public Iterable<IArtifact> getChildren() {
+    public List<IArtifact> getChildren() {
         List<IArtifact> children = newArrayList();
         children.addAll(subModules);
         return children;
