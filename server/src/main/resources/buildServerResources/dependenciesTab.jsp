@@ -114,7 +114,7 @@
                                 (dependency.scope=="test"?" <div class=\'test\'> test </div>":"") +
                                 (dependency.scope=="provided"?" <div class=\'provided\'> provided </div>":"") +
                                 (dependency.scope=="isOptional"?" <div class=\'optional\'> optional </div>":"") +
-                                ((dependency.name && !dependency.isModule)?" <div class=\'build-type-label\'> "+dependency.projectName+":"+dependency.name+" </div>":"") +
+                                ((dependency.buildTypeId && !dependency.isModule)?" <div class=\'build-type-label\'> "+dependency.buildTypeId.projectName+":"+dependency.buildTypeId.name+" </div>":"") +
                                 "<span class='tree-text'> " + dependency.groupId + ":" + dependency.artifactId + ":" + dependency.version + "</span>"
                         ,
                         html, false, hasChildren);
