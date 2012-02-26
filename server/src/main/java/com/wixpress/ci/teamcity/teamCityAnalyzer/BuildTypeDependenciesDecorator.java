@@ -55,7 +55,7 @@ class BuildTypeDependenciesDecorator {
         MDependency decoratedDependency;
         if (artifactBuildMapping.containsKey(dependencyArtifactId)) {
             BuildTypeId buildTypeId = artifactBuildMapping.get(dependencyArtifactId);
-            decoratedDependency = new MBuildTypeDependency(mDependency, buildTypeId.name, buildTypeId.buildTypeId, buildTypeId.projectName, buildTypeId.projectId);
+            decoratedDependency = new MBuildTypeDependency(mDependency, buildTypeId);
         }
         else
             decoratedDependency = new MDependency(mDependency);
@@ -125,49 +125,4 @@ class BuildTypeDependenciesDecorator {
         }
     }
 
-    private class BuildTypeId {
-        private String name;
-        private String projectName;
-        private String buildTypeId;
-        private String projectId;
-
-        public BuildTypeId(SBuildType buildType) {
-            this.name = buildType.getName();
-            this.buildTypeId = buildType.getBuildTypeId();
-            this.projectId = buildType.getProjectId();
-            this.projectName = buildType.getProjectName();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            BuildTypeId buildTypeId = (BuildTypeId) o;
-
-            if (this.buildTypeId != null ? !this.buildTypeId.equals(buildTypeId.buildTypeId) : buildTypeId.buildTypeId != null)
-                return false;
-            if (name != null ? !name.equals(buildTypeId.name) : buildTypeId.name != null) return false;
-            if (projectId != null ? !projectId.equals(buildTypeId.projectId) : buildTypeId.projectId != null) return false;
-            if (projectName != null ? !projectName.equals(buildTypeId.projectName) : buildTypeId.projectName != null)
-                return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = name != null ? name.hashCode() : 0;
-            result = 31 * result + (projectName != null ? projectName.hashCode() : 0);
-            result = 31 * result + (buildTypeId != null ? buildTypeId.hashCode() : 0);
-            result = 31 * result + (projectId != null ? projectId.hashCode() : 0);
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("%s:%s (%s:%s)", projectName, name, projectId, buildTypeId);
-        }
-
-    }
 }

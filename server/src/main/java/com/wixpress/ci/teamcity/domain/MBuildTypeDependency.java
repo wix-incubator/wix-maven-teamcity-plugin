@@ -8,51 +8,21 @@ import jetbrains.buildServer.serverSide.SBuildType;
  */
 public class MBuildTypeDependency extends MDependency {
 
-    private String name;
-    private String projectName;
-    private String buildTypeId;
-    private String projectId;
+    private BuildTypeId buildTypeId;
 
     public MBuildTypeDependency() {
     }
 
-    public MBuildTypeDependency(MDependency artifact, String name, String buildTypeId, String projectName, String projectId) {
+    public MBuildTypeDependency(MDependency artifact, BuildTypeId buildTypeId) {
         super(artifact);
-        this.name = name;
-        this.projectName = projectName;
         this.buildTypeId = buildTypeId;
-        this.projectId = projectId;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getProjectName() {
-        return projectName;
-    }
-
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
-
-    public String getBuildTypeId() {
+    public BuildTypeId getBuildTypeId() {
         return buildTypeId;
     }
 
-    public void setBuildTypeId(String buildTypeId) {
+    public void setBuildTypeId(BuildTypeId buildTypeId) {
         this.buildTypeId = buildTypeId;
-    }
-
-    public String getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
     }
 }
