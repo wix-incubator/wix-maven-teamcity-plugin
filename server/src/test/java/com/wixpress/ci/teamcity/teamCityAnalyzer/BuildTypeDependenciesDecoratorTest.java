@@ -21,11 +21,11 @@ import static org.mockito.Mockito.when;
  * @author yoav
  * @since 2/22/12
  */
-public class TeamCityBuildDependenciesAnalyzerTest {
+public class BuildTypeDependenciesDecoratorTest {
 
     ProjectManager projectManager = mock(ProjectManager.class);
     MavenBuildTypeDependenciesAnalyzer mavenBuildAnalyzer = mock(MavenBuildTypeDependenciesAnalyzer.class);
-    BuildTypesDependencyAnalyzer analyzer = new BuildTypesDependencyAnalyzer(mavenBuildAnalyzer, projectManager);
+    BuildTypeDependenciesDecorator analyzer = new BuildTypeDependenciesDecorator(mavenBuildAnalyzer, projectManager);
 
     SBuildType build1 = BuildType("proj1", "build1", "p1", "b1");
     SBuildType build2 = BuildType("proj2", "build2", "p2", "b2");
@@ -41,9 +41,10 @@ public class TeamCityBuildDependenciesAnalyzerTest {
         when(projectManager.getActiveBuildTypes()).thenReturn(ImmutableList.of(build1, build2, build3));
         when(mavenBuildAnalyzer.getBuildDependencies(eq(build1), anyBoolean())).thenReturn(new MavenDependenciesResult(build1Root));
         when(mavenBuildAnalyzer.getBuildDependencies(eq(build2), anyBoolean())).thenReturn(new MavenDependenciesResult(build2Root));
-        when(mavenBuildAnalyzer.getBuildDependencies(eq(build3), anyBoolean())).thenReturn(new MavenDependenciesResult(build3Root));
+        MavenDependenciesResult mavenDependenciesResult = new MavenDependenciesResult(build3Root);
+        when(mavenBuildAnalyzer.getBuildDependencies(eq(build3), anyBoolean())).thenReturn(mavenDependenciesResult);
 
-        BuildDependenciesResult result = analyzer.getBuildDependencies(build3);
+        BuildDependenciesResult result = analyzer.decorateWithBuildTypesAnalysis(mavenDependenciesResult, build3);
         
         assertThat(result.getModule(), IsModule("com.wixpress", "C5", "5"));
         assertThat(result.getModule(), ArtifactTreeMatcher()
@@ -66,9 +67,6 @@ public class TeamCityBuildDependenciesAnalyzerTest {
                 .match(IsMBuildTypeDependency("com.wixpress", "B2", "2", "proj2", "build2", "p2", "b2")));
     }
 
-
-
-
     private SBuildType BuildType(String projectName, String name, String projectId, String buildTypeId) {
         SBuildType buildType = mock(SBuildType.class);
         when(buildType.getBuildTypeId()).thenReturn(buildTypeId);
@@ -79,12 +77,9 @@ public class TeamCityBuildDependenciesAnalyzerTest {
 
     }
 
-
-
     private MModuleBuilder MModule(String groupId, String artifactId, String version) {
         return new MModuleBuilder(groupId, artifactId, version);
     }
-
 
     private class MModuleBuilder {
         MModule mModule;
