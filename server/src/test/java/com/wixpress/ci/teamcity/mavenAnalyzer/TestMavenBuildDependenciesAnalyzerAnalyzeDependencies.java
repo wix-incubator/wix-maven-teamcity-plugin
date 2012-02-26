@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import com.wixpress.ci.teamcity.domain.*;
 import com.wixpress.ci.teamcity.maven.MavenBooter;
 import com.wixpress.ci.teamcity.maven.MavenProjectDependenciesAnalyzer;
+import com.wixpress.ci.teamcity.mavenAnalyzer.dao.BuildTypeDependenciesStorage;
+import com.wixpress.ci.teamcity.mavenAnalyzer.dao.DependenciesDao;
 import jetbrains.buildServer.serverSide.CustomDataStorage;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.vcs.VcsException;
@@ -16,7 +18,6 @@ import org.mockito.Matchers;
 import java.io.IOException;
 import java.util.Map;
 
-import static com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer.ModuleStorage;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
@@ -29,7 +30,7 @@ import static org.mockito.Mockito.*;
 public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
     
     MavenBooter mavenBooter = mock(MavenBooter.class);
-    ObjectMapper objectMapper = new ObjectMapper();
+    DependenciesDao dependenciesDao = mock(DependenciesDao.class);
     MavenProjectDependenciesAnalyzer mavenProjectDependenciesAnalyzer = mock(MavenProjectDependenciesAnalyzer.class);
     CollectDependenciesExecutor executor = mock(CollectDependenciesExecutor.class);
     CollectDependenciesRunner runner = mock(CollectDependenciesRunner.class);
@@ -37,15 +38,14 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
     SBuildType buildType = mock(SBuildType.class);
     CustomDataStorage customDataStorage = mock(CustomDataStorage.class);
     TeamCityBuildMavenDependenciesAnalyzer analyzer =
-            new TeamCityBuildMavenDependenciesAnalyzer(mavenBooter, objectMapper, mavenProjectDependenciesAnalyzer, executor);
+            new TeamCityBuildMavenDependenciesAnalyzer(mavenBooter, dependenciesDao, mavenProjectDependenciesAnalyzer, executor);
 
     
     @Test
-    public void dependenciesNeverRun() {
+    public void dependenciesNeverRun() throws IOException {
         when(executor.getRunner(buildType)).thenReturn(null);
-        when(buildType.getCustomDataStorage(TeamCityBuildMavenDependenciesAnalyzer.DEPENDENCIES_STORAGE)).thenReturn(customDataStorage);
-        when(customDataStorage.getValue(TeamCityBuildMavenDependenciesAnalyzer.BUILD_DEPENDENCIES)).thenReturn(null);
-        
+        when(dependenciesDao.load(buildType)).thenReturn(null);
+
         MavenDependenciesResult result = analyzer.analyzeDependencies(buildType);
 
         assertThat(result.getResultType(), is(ResultType.runningAsync));
@@ -56,8 +56,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
     @Test
     public void analyzeDependenciesCurrent() throws IOException, VcsException {
         when(executor.getRunner(buildType)).thenReturn(null);
-        when(buildType.getCustomDataStorage(TeamCityBuildMavenDependenciesAnalyzer.DEPENDENCIES_STORAGE)).thenReturn(customDataStorage);
-        when(customDataStorage.getValue(TeamCityBuildMavenDependenciesAnalyzer.BUILD_DEPENDENCIES)).thenReturn(serializedDefaultModuleStorage());
+        when(dependenciesDao.load(buildType)).thenReturn(serializedDefaultModuleStorage());
         when(buildType.getVcsRootInstances()).thenReturn(ImmutableList.of(vcsRootInstance));
         when(vcsRootInstance.getName()).thenReturn("vcs1");
         when(vcsRootInstance.getCurrentRevision()).thenReturn("1.2");
@@ -71,8 +70,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
     @Test
     public void analyzeDependenciesNewRevision() throws IOException, VcsException {
         when(executor.getRunner(buildType)).thenReturn(null);
-        when(buildType.getCustomDataStorage(TeamCityBuildMavenDependenciesAnalyzer.DEPENDENCIES_STORAGE)).thenReturn(customDataStorage);
-        when(customDataStorage.getValue(TeamCityBuildMavenDependenciesAnalyzer.BUILD_DEPENDENCIES)).thenReturn(serializedDefaultModuleStorage());
+        when(dependenciesDao.load(buildType)).thenReturn(serializedDefaultModuleStorage());
         when(buildType.getVcsRootInstances()).thenReturn(ImmutableList.of(vcsRootInstance));
         when(vcsRootInstance.getName()).thenReturn("vcs1");
         when(vcsRootInstance.getCurrentRevision()).thenReturn("1.3");
@@ -86,8 +84,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
     @Test
     public void getBuildDependenciesCurrent() throws IOException, VcsException {
         when(executor.getRunner(buildType)).thenReturn(null);
-        when(buildType.getCustomDataStorage(TeamCityBuildMavenDependenciesAnalyzer.DEPENDENCIES_STORAGE)).thenReturn(customDataStorage);
-        when(customDataStorage.getValue(TeamCityBuildMavenDependenciesAnalyzer.BUILD_DEPENDENCIES)).thenReturn(serializedDefaultModuleStorage());
+        when(dependenciesDao.load(buildType)).thenReturn(serializedDefaultModuleStorage());
         when(buildType.getVcsRootInstances()).thenReturn(ImmutableList.of(vcsRootInstance));
         when(vcsRootInstance.getName()).thenReturn("vcs1");
         when(vcsRootInstance.getCurrentRevision()).thenReturn("1.2");
@@ -101,8 +98,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
     @Test
     public void getBuildDependenciesNewRevision() throws IOException, VcsException {
         when(executor.getRunner(buildType)).thenReturn(null);
-        when(buildType.getCustomDataStorage(TeamCityBuildMavenDependenciesAnalyzer.DEPENDENCIES_STORAGE)).thenReturn(customDataStorage);
-        when(customDataStorage.getValue(TeamCityBuildMavenDependenciesAnalyzer.BUILD_DEPENDENCIES)).thenReturn(serializedDefaultModuleStorage());
+        when(dependenciesDao.load(buildType)).thenReturn(serializedDefaultModuleStorage());
         when(buildType.getVcsRootInstances()).thenReturn(ImmutableList.of(vcsRootInstance));
         when(vcsRootInstance.getName()).thenReturn("vcs1");
         when(vcsRootInstance.getCurrentRevision()).thenReturn("1.3");
@@ -129,8 +125,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
     public void analyzeDependenciesRunningCompleted() throws IOException, VcsException {
         when(executor.getRunner(buildType)).thenReturn(runner);
         when(runner.isCompleted()).thenReturn(true);
-        when(buildType.getCustomDataStorage(TeamCityBuildMavenDependenciesAnalyzer.DEPENDENCIES_STORAGE)).thenReturn(customDataStorage);
-        when(customDataStorage.getValue(TeamCityBuildMavenDependenciesAnalyzer.BUILD_DEPENDENCIES)).thenReturn(serializedDefaultModuleStorage());
+        when(dependenciesDao.load(buildType)).thenReturn(serializedDefaultModuleStorage());
         when(buildType.getVcsRootInstances()).thenReturn(ImmutableList.of(vcsRootInstance));
         when(vcsRootInstance.getName()).thenReturn("vcs1");
         when(vcsRootInstance.getCurrentRevision()).thenReturn("1.2");
@@ -145,8 +140,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
     public void analyzeDependenciesRunFailed() throws IOException, VcsException {
         when(executor.getRunner(buildType)).thenReturn(null);
         when(runner.isCompleted()).thenReturn(true);
-        when(buildType.getCustomDataStorage(TeamCityBuildMavenDependenciesAnalyzer.DEPENDENCIES_STORAGE)).thenReturn(customDataStorage);
-        when(customDataStorage.getValue(TeamCityBuildMavenDependenciesAnalyzer.BUILD_DEPENDENCIES)).thenReturn(serializedModuleStorageWithError());
+        when(dependenciesDao.load(buildType)).thenReturn(serializedModuleStorageWithError());
 
         MavenDependenciesResult result = analyzer.analyzeDependencies(buildType);
 
@@ -158,8 +152,7 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
     public void forceAnalyzeDependenciesRunFailed() throws IOException, VcsException {
         when(executor.getRunner(buildType)).thenReturn(null);
         when(runner.isCompleted()).thenReturn(true);
-        when(buildType.getCustomDataStorage(TeamCityBuildMavenDependenciesAnalyzer.DEPENDENCIES_STORAGE)).thenReturn(customDataStorage);
-        when(customDataStorage.getValue(TeamCityBuildMavenDependenciesAnalyzer.BUILD_DEPENDENCIES)).thenReturn(serializedModuleStorageWithError());
+        when(dependenciesDao.load(buildType)).thenReturn(serializedModuleStorageWithError());
 
         MavenDependenciesResult result = analyzer.forceAnalyzeDependencies(buildType);
         assertThat(result.getResultType(), is(ResultType.runningAsync));
@@ -187,15 +180,13 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
         assertThat(collectProgressRes.isRunFound(), is(false));
     }
 
-    private String serializedDefaultModuleStorage() throws IOException {
+    private BuildTypeDependenciesStorage serializedDefaultModuleStorage() throws IOException {
         MModule module = new MModule("module", "artifact", "1.2");
         Map<String, String> rev = ImmutableMap.of("vcs1", "1.2");
-        ModuleStorage moduleStorage = new ModuleStorage(module, rev);
-        return objectMapper.writeValueAsString(moduleStorage);
+        return new BuildTypeDependenciesStorage(module, rev);
     }
 
-    private String serializedModuleStorageWithError() throws IOException {
-        ModuleStorage moduleStorage = new ModuleStorage(ImmutableList.of(new LogMessage("failed running", LogMessageType.error)));
-        return objectMapper.writeValueAsString(moduleStorage);
+    private BuildTypeDependenciesStorage serializedModuleStorageWithError() throws IOException {
+        return new BuildTypeDependenciesStorage(ImmutableList.of(new LogMessage("failed running", LogMessageType.error)));
     }
 }

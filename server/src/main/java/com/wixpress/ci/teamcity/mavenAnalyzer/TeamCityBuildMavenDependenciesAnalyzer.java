@@ -5,6 +5,8 @@ import com.wixpress.ci.teamcity.domain.*;
 import com.wixpress.ci.teamcity.maven.MavenBooter;
 import com.wixpress.ci.teamcity.maven.MavenProjectDependenciesAnalyzer;
 import com.wixpress.ci.teamcity.DependenciesAnalyzer;
+import com.wixpress.ci.teamcity.mavenAnalyzer.dao.BuildTypeDependenciesStorage;
+import com.wixpress.ci.teamcity.mavenAnalyzer.dao.DependenciesDao;
 import jetbrains.buildServer.serverSide.CustomDataStorage;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.vcs.VcsException;
@@ -13,7 +15,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -26,19 +27,16 @@ import static com.google.common.collect.Maps.newHashMap;
  */
 public class TeamCityBuildMavenDependenciesAnalyzer implements DependenciesAnalyzer<MavenDependenciesResult> {
 
-    public static final String DEPENDENCIES_STORAGE = "com.wixpress.dependencies-storage";
-    public static final String BUILD_DEPENDENCIES = "build-dependencies";
-
     private static final File tempDir = new File(System.getProperty( "java.io.tmpdir" ));
     private MavenProjectDependenciesAnalyzer mavenDependenciesAnalyzer;
     private MavenBooter mavenBooter;
     private CollectDependenciesExecutor executor;
-    private ObjectMapper objectMapper;
+    private DependenciesDao dependenciesDao;
 
-    public TeamCityBuildMavenDependenciesAnalyzer(MavenBooter mavenBooter, ObjectMapper objectMapper, MavenProjectDependenciesAnalyzer mavenProjectDependenciesAnalyzer, CollectDependenciesExecutor executor) {
+    public TeamCityBuildMavenDependenciesAnalyzer(MavenBooter mavenBooter, DependenciesDao dependenciesDao, MavenProjectDependenciesAnalyzer mavenProjectDependenciesAnalyzer, CollectDependenciesExecutor executor) {
         this.mavenBooter = mavenBooter;
         this.mavenDependenciesAnalyzer = mavenProjectDependenciesAnalyzer;
-        this.objectMapper = objectMapper;
+        this.dependenciesDao = dependenciesDao;
         this.executor = executor;
     }
 
@@ -116,18 +114,16 @@ public class TeamCityBuildMavenDependenciesAnalyzer implements DependenciesAnaly
     }
 
     private MavenDependenciesResult load(SBuildType buildType, boolean checkIfRefreshNeeded) {
-        CustomDataStorage customDataStorage = buildType.getCustomDataStorage(DEPENDENCIES_STORAGE);
-        String serialized = customDataStorage.getValue(BUILD_DEPENDENCIES);
-        if (serialized == null)
-            return new MavenDependenciesResult(ResultType.notRun);
         try {
-            ModuleStorage moduleStorage = objectMapper.readValue(serialized, ModuleStorage.class);
-            if (moduleStorage.isException)
-                return new MavenDependenciesResult(moduleStorage.getMessages());
-            if (checkIfRefreshNeeded && hasNewerVcsRevision(moduleStorage.getVcsRevisions(), getBuildVcsRevisions(buildType)))
-                return new MavenDependenciesResult(ResultType.needsRefresh, moduleStorage.getModule());
+            BuildTypeDependenciesStorage dependenciesStorage = dependenciesDao.load(buildType);
+            if (dependenciesStorage == null)
+                return new MavenDependenciesResult(ResultType.notRun);
+            else if (dependenciesStorage.isException())
+                return new MavenDependenciesResult(dependenciesStorage.getMessages());
+            else if (checkIfRefreshNeeded && hasNewerVcsRevision(dependenciesStorage.getVcsRevisions(), getBuildVcsRevisions(buildType)))
+                return new MavenDependenciesResult(ResultType.needsRefresh, dependenciesStorage.getModule());
             else
-                return new MavenDependenciesResult(moduleStorage.getModule());
+                return new MavenDependenciesResult(dependenciesStorage.getModule());
         } catch (IOException e) {
             return new MavenDependenciesResult(e);
         } catch (VcsException e) {
@@ -136,16 +132,14 @@ public class TeamCityBuildMavenDependenciesAnalyzer implements DependenciesAnaly
     }
 
     void save(MModule mModule, SBuildType buildType, CollectingMessagesListenerLogger listenerLogger) throws IOException, VcsException {
-        ModuleStorage moduleStorage = new ModuleStorage(mModule, getBuildVcsRevisions(buildType));
-        String serializedModule = objectMapper.writeValueAsString(moduleStorage);
-        buildType.getCustomDataStorage(DEPENDENCIES_STORAGE).putValue(BUILD_DEPENDENCIES, serializedModule);
+        BuildTypeDependenciesStorage dependenciesStorage = new BuildTypeDependenciesStorage(mModule, getBuildVcsRevisions(buildType));
+        dependenciesDao.save(dependenciesStorage, buildType);
         listenerLogger.info("build dependencies saved");
     }
 
     void saveError(SBuildType buildType, CollectingMessagesListenerLogger listenerLogger) throws IOException {
-        ModuleStorage moduleStorage = new ModuleStorage(listenerLogger.getMessages());
-        String serializedModule = objectMapper.writeValueAsString(moduleStorage);
-        buildType.getCustomDataStorage(DEPENDENCIES_STORAGE).putValue(BUILD_DEPENDENCIES, serializedModule);
+        BuildTypeDependenciesStorage dependenciesStorage = new BuildTypeDependenciesStorage(listenerLogger.getMessages());
+        dependenciesDao.save(dependenciesStorage, buildType);
         listenerLogger.info("build dependencies saved");
     }
 
@@ -165,56 +159,4 @@ public class TeamCityBuildMavenDependenciesAnalyzer implements DependenciesAnaly
         return mavenBooter;
     }
 
-    public static class ModuleStorage {
-        private MModule module;
-        private Map<String, String> vcsRevisions = newHashMap();
-        private List<LogMessage> messages = newArrayList();
-        private boolean isException;
-
-        public ModuleStorage() {
-        }
-
-        public ModuleStorage(MModule module, Map<String, String> vcsRevisions) {
-            this.module = module;
-            this.vcsRevisions = vcsRevisions;
-            this.isException = false;
-        }
-
-        public ModuleStorage(List<LogMessage> messages) {
-            this.messages = messages;
-            this.isException = true;
-        }
-
-        public MModule getModule() {
-            return module;
-        }
-
-        public void setModule(MModule module) {
-            this.module = module;
-        }
-
-        public Map<String, String> getVcsRevisions() {
-            return vcsRevisions;
-        }
-
-        public void setVcsRevisions(Map<String, String> vcsRevisions) {
-            this.vcsRevisions = vcsRevisions;
-        }
-
-        public List<LogMessage> getMessages() {
-            return messages;
-        }
-
-        public void setMessages(List<LogMessage> messages) {
-            this.messages = messages;
-        }
-
-        public boolean isException() {
-            return isException;
-        }
-
-        public void setException(boolean exception) {
-            isException = exception;
-        }
-    }
 }
