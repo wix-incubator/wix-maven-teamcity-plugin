@@ -27,13 +27,17 @@ public class TeamCityBuildDependenciesAnalyzer implements DependenciesAnalyzer<B
         this.projectManager = projectManager;
     }
 
+    public BuildDependenciesResult getBuildDependencies(SBuildType buildType) {
+        return getBuildDependencies(buildType, true);
+    }
+
     /**
      * gets the BuildType dependencies as well as the maven dependencies of a project
      * @param buildType
      * @return
      */
-    public BuildDependenciesResult getBuildDependencies(SBuildType buildType) {
-        MavenDependenciesResult mavenResult = mavenDependenciesAnalyzer.getBuildDependencies(buildType);
+    public BuildDependenciesResult getBuildDependencies(SBuildType buildType, boolean checkForNewerRevision) {
+        MavenDependenciesResult mavenResult = mavenDependenciesAnalyzer.getBuildDependencies(buildType, checkForNewerRevision);
         if (mavenResult.getResultType().hasDependencies())
             return decorateWithBuildTypesAnalysis(mavenResult, buildType);
         else
@@ -71,7 +75,7 @@ public class TeamCityBuildDependenciesAnalyzer implements DependenciesAnalyzer<B
     private Map<ArtifactId, BuildTypeId> readArtifactModuleMapping(RequestCache requestCache) {
         Map<ArtifactId, BuildTypeId> artifactBuildMapping = newHashMap();
         for (SBuildType buildType: projectManager.getActiveBuildTypes()) {
-            MavenDependenciesResult buildDependencies = requestCache.getBuildDependencies(buildType);
+            MavenDependenciesResult buildDependencies = requestCache.getBuildDependencies(buildType, false);
             if (buildDependencies.getResultType() == ResultType.current ||
                     buildDependencies.getResultType() == ResultType.needsRefresh)
                 extractArtifactModuleMapping(buildDependencies.getModule(), artifactBuildMapping, buildType);
@@ -112,11 +116,11 @@ public class TeamCityBuildDependenciesAnalyzer implements DependenciesAnalyzer<B
     private class RequestCache {
         private Map<String, MavenDependenciesResult> resultsCache = newHashMap();
         
-        public MavenDependenciesResult getBuildDependencies(SBuildType buildType) {
+        public MavenDependenciesResult getBuildDependencies(SBuildType buildType, boolean checkForNewerRevision) {
             if (resultsCache.containsKey(buildType.getBuildTypeId()))
                 return resultsCache.get(buildType.getBuildTypeId());
             else {
-                MavenDependenciesResult buildDependencies = mavenDependenciesAnalyzer.getBuildDependencies(buildType);
+                MavenDependenciesResult buildDependencies = mavenDependenciesAnalyzer.getBuildDependencies(buildType, checkForNewerRevision);
                 resultsCache.put(buildType.getBuildTypeId(), buildDependencies);
                 return buildDependencies;
             }

@@ -11,7 +11,6 @@ import jetbrains.buildServer.serverSide.CustomDataStorage;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.vcs.VcsException;
 import jetbrains.buildServer.vcs.VcsRootInstance;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import org.mockito.Matchers;
 
@@ -36,7 +35,6 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
     CollectDependenciesRunner runner = mock(CollectDependenciesRunner.class);
     VcsRootInstance vcsRootInstance = mock(VcsRootInstance.class);
     SBuildType buildType = mock(SBuildType.class);
-    CustomDataStorage customDataStorage = mock(CustomDataStorage.class);
     TeamCityBuildMavenDependenciesAnalyzer analyzer =
             new TeamCityBuildMavenDependenciesAnalyzer(mavenBooter, dependenciesDao, mavenProjectDependenciesAnalyzer, executor);
 
@@ -89,23 +87,37 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
         when(vcsRootInstance.getName()).thenReturn("vcs1");
         when(vcsRootInstance.getCurrentRevision()).thenReturn("1.2");
 
-        MavenDependenciesResult result = analyzer.getBuildDependencies(buildType);
+        MavenDependenciesResult result = analyzer.getBuildDependencies(buildType, true);
 
         assertThat(result.getResultType(), is(ResultType.current));
         verify(executor, never()).execute(Matchers.<CollectDependenciesRunner>any());
     }
 
     @Test
-    public void getBuildDependenciesNewRevision() throws IOException, VcsException {
+    public void getBuildDependenciesNewRevisionWithCheck() throws IOException, VcsException {
         when(executor.getRunner(buildType)).thenReturn(null);
         when(dependenciesDao.load(buildType)).thenReturn(serializedDefaultModuleStorage());
         when(buildType.getVcsRootInstances()).thenReturn(ImmutableList.of(vcsRootInstance));
         when(vcsRootInstance.getName()).thenReturn("vcs1");
         when(vcsRootInstance.getCurrentRevision()).thenReturn("1.3");
 
-        MavenDependenciesResult result = analyzer.getBuildDependencies(buildType);
+        MavenDependenciesResult result = analyzer.getBuildDependencies(buildType, true);
 
         assertThat(result.getResultType(), is(ResultType.needsRefresh));
+        verify(executor, never()).execute(Matchers.<CollectDependenciesRunner>any());
+    }
+
+    @Test
+    public void getBuildDependenciesNewRevisionWithoutCheck() throws IOException, VcsException {
+        when(executor.getRunner(buildType)).thenReturn(null);
+        when(dependenciesDao.load(buildType)).thenReturn(serializedDefaultModuleStorage());
+        when(buildType.getVcsRootInstances()).thenReturn(ImmutableList.of(vcsRootInstance));
+        when(vcsRootInstance.getName()).thenReturn("vcs1");
+        when(vcsRootInstance.getCurrentRevision()).thenReturn("1.3");
+
+        MavenDependenciesResult result = analyzer.getBuildDependencies(buildType, false);
+
+        assertThat(result.getResultType(), is(ResultType.current));
         verify(executor, never()).execute(Matchers.<CollectDependenciesRunner>any());
     }
 

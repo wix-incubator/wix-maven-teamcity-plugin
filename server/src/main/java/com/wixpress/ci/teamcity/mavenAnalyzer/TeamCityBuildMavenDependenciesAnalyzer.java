@@ -7,17 +7,14 @@ import com.wixpress.ci.teamcity.maven.MavenProjectDependenciesAnalyzer;
 import com.wixpress.ci.teamcity.DependenciesAnalyzer;
 import com.wixpress.ci.teamcity.mavenAnalyzer.dao.BuildTypeDependenciesStorage;
 import com.wixpress.ci.teamcity.mavenAnalyzer.dao.DependenciesDao;
-import jetbrains.buildServer.serverSide.CustomDataStorage;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.vcs.VcsException;
 import jetbrains.buildServer.vcs.VcsRootInstance;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
@@ -40,13 +37,18 @@ public class TeamCityBuildMavenDependenciesAnalyzer implements DependenciesAnaly
         this.executor = executor;
     }
 
+    public MavenDependenciesResult getBuildDependencies(SBuildType buildType) {
+        return getBuildDependencies(buildType, true);
+    }
+
     /**
      * get the most up to date build dependencies in store without refresh
      * @param buildType build type for which to get the dependencies
+     * @param checkForNewerRevision should we check if a found dependencies may need refresh cause of a new VCS revision?
      * @return dependencies result
      */
-    public MavenDependenciesResult getBuildDependencies(SBuildType buildType) {
-        return getBuildDependencies(buildType, false);
+    public MavenDependenciesResult getBuildDependencies(SBuildType buildType, boolean checkForNewerRevision) {
+        return getBuildDependencies(buildType, false, checkForNewerRevision);
     }
 
     /**
@@ -55,7 +57,7 @@ public class TeamCityBuildMavenDependenciesAnalyzer implements DependenciesAnaly
      * @return dependencies result
      */
     public MavenDependenciesResult analyzeDependencies(SBuildType buildType) {
-        return getBuildDependencies(buildType, true);
+        return getBuildDependencies(buildType, true, true);
     }
 
     public MavenDependenciesResult forceAnalyzeDependencies(SBuildType buildType) {
@@ -68,7 +70,7 @@ public class TeamCityBuildMavenDependenciesAnalyzer implements DependenciesAnaly
         }
     }
     
-    private MavenDependenciesResult getBuildDependencies(SBuildType buildType, boolean refreshIfNeeded) {
+    private MavenDependenciesResult getBuildDependencies(SBuildType buildType, boolean refreshIfNeeded, boolean checkForNewerRevision) {
         CollectDependenciesRunner runner = executor.getRunner(buildType);
         if (runner != null) {
             if (runner.isCompleted())
@@ -77,7 +79,7 @@ public class TeamCityBuildMavenDependenciesAnalyzer implements DependenciesAnaly
                 return new MavenDependenciesResult(ResultType.runningAsync);
         }
         else {
-            MavenDependenciesResult dependenciesResult = load(buildType, true);
+            MavenDependenciesResult dependenciesResult = load(buildType, checkForNewerRevision);
             if ((refreshIfNeeded && (dependenciesResult.getResultType() == ResultType.needsRefresh)) ||
                     (dependenciesResult.getResultType() == ResultType.notRun)) {
                 collectDependencies(buildType);

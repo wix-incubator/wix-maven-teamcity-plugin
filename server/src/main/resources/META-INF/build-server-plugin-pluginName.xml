@@ -8,6 +8,7 @@
     <bean class="com.wixpress.ci.teamcity.dependenciesTab.TeamCityEventsListener"/>
     <!-- the analyzers -->
     <bean id="objectMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
+    <bean id="dependenciesDao" class="com.wixpress.ci.teamcity.mavenAnalyzer.dao.BuildTypeCustomStorageDependenciesDao"/>
     <bean id="mavenBooter" class="com.wixpress.ci.teamcity.maven.MavenBooter"/>
     <bean id="remoteRepositories" factory-bean="mavenBooter" factory-method="remoteRepositories"/>
     <bean id="repositorySystem" factory-bean="mavenBooter" factory-method="repositorySystem"/>
@@ -16,12 +17,7 @@
         <constructor-arg index="1" ref="repositorySystem"/>
     </bean>
     <bean id="executor" class="com.wixpress.ci.teamcity.mavenAnalyzer.CollectDependenciesExecutor" destroy-method="shutdown"/>
-    <bean id="mavenDependenciesAnalyzer" class="com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer">
-        <constructor-arg ref="mavenBooter"/>
-        <constructor-arg ref="objectMapper"/>
-        <constructor-arg ref="mavenProjectDependenciesAnalyzer"/>
-        <constructor-arg ref="executor"/>
-    </bean>
+    <bean id="mavenDependenciesAnalyzer" class="com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer"/>
 
     <bean class="com.wixpress.ci.teamcity.teamCityAnalyzer.TeamCityBuildDependenciesAnalyzer">
         <constructor-arg ref="mavenDependenciesAnalyzer"/>

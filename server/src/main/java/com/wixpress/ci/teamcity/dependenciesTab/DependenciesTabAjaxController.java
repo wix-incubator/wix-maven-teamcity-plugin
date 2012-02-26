@@ -1,7 +1,6 @@
 package com.wixpress.ci.teamcity.dependenciesTab;
 
 import com.wixpress.ci.teamcity.DependenciesAnalyzer;
-import com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer;
 import com.wixpress.ci.teamcity.teamCityAnalyzer.TeamCityBuildDependenciesAnalyzer;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.serverSide.ProjectManager;
@@ -38,9 +37,9 @@ public class DependenciesTabAjaxController extends BaseController {
         this.objectMapper = objectMapper;
         this.projectManager = projectManager;
 
-        registerProgressOperation(dependenciesAnalyzer);
-        registerForceAnalyzeDependencies(projectManager, dependenciesAnalyzer);
-        registerGetBuildDependencies(projectManager, dependenciesAnalyzer);
+        registerProgressOperation();
+        registerForceAnalyzeDependencies();
+        registerGetBuildDependencies();
     }
 
     @Override
@@ -58,21 +57,21 @@ public class DependenciesTabAjaxController extends BaseController {
         myManager.registerController("/maven-dependencies-plugin.html", this);
     }
 
-    private void registerGetBuildDependencies(final ProjectManager projectManager, final DependenciesAnalyzer dependenciesAnalyzer) {
+    private void registerGetBuildDependencies() {
         actions.put("getBuildDependencies", new Action() {
             @Override
             Object doHandle(HttpServletRequest request) throws IOException {
                 String id = getParameter(request, "id");
                 SBuildType buildType = projectManager.findBuildTypeById(id);
                 if (buildType != null)
-                    return dependenciesAnalyzer.getBuildDependencies(buildType);
+                    return dependenciesAnalyzer.getBuildDependencies(buildType, true);
                 else
                     throw new ResourceNotFoundException("build [%s] not found", id);
             }
         });
     }
 
-    private void registerForceAnalyzeDependencies(final ProjectManager projectManager, final DependenciesAnalyzer dependenciesAnalyzer) {
+    private void registerForceAnalyzeDependencies() {
         actions.put("forceAnalyzeDependencies", new Action() {
             @Override
             Object doHandle(HttpServletRequest request) throws IOException {
@@ -86,7 +85,7 @@ public class DependenciesTabAjaxController extends BaseController {
         });
     }
 
-    private void registerProgressOperation(final DependenciesAnalyzer dependenciesAnalyzer) {
+    private void registerProgressOperation() {
         actions.put("progress", new Action() {
             @Override
             Object doHandle(HttpServletRequest request) throws IOException {

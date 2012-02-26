@@ -11,6 +11,8 @@ import jetbrains.buildServer.serverSide.SBuildType;
 public interface DependenciesAnalyzer<Result extends DependenciesResult> {
     Result getBuildDependencies(SBuildType buildType);
 
+    Result getBuildDependencies(SBuildType buildType, boolean checkForNewerRevision);
+
     Result analyzeDependencies(SBuildType buildType);
 
     Result forceAnalyzeDependencies(SBuildType buildType);
