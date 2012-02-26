@@ -1,7 +1,7 @@
 package com.wixpress.ci.teamcity.dependenciesTab;
 
 import com.wixpress.ci.teamcity.DependenciesAnalyzer;
-import com.wixpress.ci.teamcity.teamCityAnalyzer.TeamCityBuildDependenciesAnalyzer;
+import com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypesDependencyAnalyzer;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildServer;
@@ -29,11 +29,11 @@ public class DependenciesTabAjaxController extends BaseController {
 
     public DependenciesTabAjaxController(SBuildServer server, WebControllerManager myManager,
                                          final ProjectManager projectManager,
-                                         final TeamCityBuildDependenciesAnalyzer dependenciesAnalyzer,
+                                         final BuildTypesDependencyAnalyzer buildTypesAnalyzer,
                                          final ObjectMapper objectMapper) {
         super(server);
         this.myManager = myManager;
-        this.dependenciesAnalyzer = dependenciesAnalyzer;
+        this.dependenciesAnalyzer = buildTypesAnalyzer;
         this.objectMapper = objectMapper;
         this.projectManager = projectManager;
 

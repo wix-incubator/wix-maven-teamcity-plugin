@@ -7,7 +7,6 @@ import com.wixpress.ci.teamcity.maven.MavenBooter;
 import com.wixpress.ci.teamcity.maven.MavenProjectDependenciesAnalyzer;
 import com.wixpress.ci.teamcity.mavenAnalyzer.dao.BuildTypeDependenciesStorage;
 import com.wixpress.ci.teamcity.mavenAnalyzer.dao.DependenciesDao;
-import jetbrains.buildServer.serverSide.CustomDataStorage;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.vcs.VcsException;
 import jetbrains.buildServer.vcs.VcsRootInstance;
@@ -35,8 +34,8 @@ public class TestMavenBuildDependenciesAnalyzerAnalyzeDependencies {
     CollectDependenciesRunner runner = mock(CollectDependenciesRunner.class);
     VcsRootInstance vcsRootInstance = mock(VcsRootInstance.class);
     SBuildType buildType = mock(SBuildType.class);
-    TeamCityBuildMavenDependenciesAnalyzer analyzer =
-            new TeamCityBuildMavenDependenciesAnalyzer(mavenBooter, dependenciesDao, mavenProjectDependenciesAnalyzer, executor);
+    MavenBuildTypeDependenciesAnalyzer analyzer =
+            new MavenBuildTypeDependenciesAnalyzer(mavenBooter, dependenciesDao, mavenProjectDependenciesAnalyzer, executor);
 
     
     @Test

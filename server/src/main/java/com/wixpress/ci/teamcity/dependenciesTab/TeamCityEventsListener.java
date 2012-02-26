@@ -1,7 +1,7 @@
 package com.wixpress.ci.teamcity.dependenciesTab;
 
 import com.wixpress.ci.teamcity.DependenciesAnalyzer;
-import com.wixpress.ci.teamcity.teamCityAnalyzer.TeamCityBuildDependenciesAnalyzer;
+import com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypesDependencyAnalyzer;
 import jetbrains.buildServer.serverSide.BuildServerAdapter;
 import jetbrains.buildServer.serverSide.BuildServerListener;
 import jetbrains.buildServer.serverSide.SRunningBuild;
@@ -16,9 +16,9 @@ public class TeamCityEventsListener {
     private DependenciesAnalyzer dependenciesAnalyzer;
 
     public TeamCityEventsListener(EventDispatcher<BuildServerListener> eventDispatcher,
-                                  TeamCityBuildDependenciesAnalyzer dependenciesAnalyzer) {
+                                  BuildTypesDependencyAnalyzer buildTypesAnalyzer) {
         this.eventDispatcher = eventDispatcher;
-        this.dependenciesAnalyzer = dependenciesAnalyzer;
+        this.dependenciesAnalyzer = buildTypesAnalyzer;
         eventDispatcher.addListener(new DependenciesEventListener());
     }
 

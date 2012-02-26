@@ -2,7 +2,7 @@ package com.wixpress.ci.teamcity.teamCityAnalyzer;
 
 import com.wixpress.ci.teamcity.DependenciesAnalyzer;
 import com.wixpress.ci.teamcity.domain.*;
-import com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer;
+import com.wixpress.ci.teamcity.mavenAnalyzer.MavenBuildTypeDependenciesAnalyzer;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
 
@@ -10,20 +10,19 @@ import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.collect.Maps.synchronizedBiMap;
 
 /**
  * analyzes the dependencies between TeamCity build configurations based on Maven dependencies
  * @author yoav
  * @since 2/22/12
  */
-public class TeamCityBuildDependenciesAnalyzer implements DependenciesAnalyzer<BuildDependenciesResult>{
+public class BuildTypesDependencyAnalyzer implements DependenciesAnalyzer<BuildDependenciesResult>{
 
-    private TeamCityBuildMavenDependenciesAnalyzer mavenDependenciesAnalyzer;
+    private MavenBuildTypeDependenciesAnalyzer mavenBuildAnalyzer;
     private ProjectManager projectManager;
 
-    public TeamCityBuildDependenciesAnalyzer(TeamCityBuildMavenDependenciesAnalyzer mavenDependenciesAnalyzer, ProjectManager projectManager) {
-        this.mavenDependenciesAnalyzer = mavenDependenciesAnalyzer;
+    public BuildTypesDependencyAnalyzer(MavenBuildTypeDependenciesAnalyzer mavenBuildAnalyzer, ProjectManager projectManager) {
+        this.mavenBuildAnalyzer = mavenBuildAnalyzer;
         this.projectManager = projectManager;
     }
 
@@ -37,7 +36,7 @@ public class TeamCityBuildDependenciesAnalyzer implements DependenciesAnalyzer<B
      * @return
      */
     public BuildDependenciesResult getBuildDependencies(SBuildType buildType, boolean checkForNewerRevision) {
-        MavenDependenciesResult mavenResult = mavenDependenciesAnalyzer.getBuildDependencies(buildType, checkForNewerRevision);
+        MavenDependenciesResult mavenResult = mavenBuildAnalyzer.getBuildDependencies(buildType, checkForNewerRevision);
         if (mavenResult.getResultType().hasDependencies())
             return decorateWithBuildTypesAnalysis(mavenResult, buildType);
         else
@@ -45,7 +44,7 @@ public class TeamCityBuildDependenciesAnalyzer implements DependenciesAnalyzer<B
     }
 
     public BuildDependenciesResult analyzeDependencies(SBuildType buildType) {
-        MavenDependenciesResult mavenResult = mavenDependenciesAnalyzer.analyzeDependencies(buildType);
+        MavenDependenciesResult mavenResult = mavenBuildAnalyzer.analyzeDependencies(buildType);
         if (mavenResult.getResultType().hasDependencies())
             return decorateWithBuildTypesAnalysis(mavenResult, buildType);
         else
@@ -53,12 +52,12 @@ public class TeamCityBuildDependenciesAnalyzer implements DependenciesAnalyzer<B
     }
 
     public BuildDependenciesResult forceAnalyzeDependencies(SBuildType buildType) {
-        MavenDependenciesResult mavenResult = mavenDependenciesAnalyzer.forceAnalyzeDependencies(buildType);
+        MavenDependenciesResult mavenResult = mavenBuildAnalyzer.forceAnalyzeDependencies(buildType);
         return toBuildDependenciesResult(mavenResult, buildType);
     }
 
     public CollectProgress getProgress(String buildTypeId, Integer position) {
-        return mavenDependenciesAnalyzer.getProgress(buildTypeId, position);
+        return mavenBuildAnalyzer.getProgress(buildTypeId, position);
     }
 
     private BuildDependenciesResult decorateWithBuildTypesAnalysis(MavenDependenciesResult mavenResult, SBuildType buildType) {
@@ -120,7 +119,7 @@ public class TeamCityBuildDependenciesAnalyzer implements DependenciesAnalyzer<B
             if (resultsCache.containsKey(buildType.getBuildTypeId()))
                 return resultsCache.get(buildType.getBuildTypeId());
             else {
-                MavenDependenciesResult buildDependencies = mavenDependenciesAnalyzer.getBuildDependencies(buildType, checkForNewerRevision);
+                MavenDependenciesResult buildDependencies = mavenBuildAnalyzer.getBuildDependencies(buildType, checkForNewerRevision);
                 resultsCache.put(buildType.getBuildTypeId(), buildDependencies);
                 return buildDependencies;
             }

@@ -2,11 +2,9 @@ package com.wixpress.ci.teamcity.dependenciesTab;
 
 import com.wixpress.ci.teamcity.DependenciesAnalyzer;
 import com.wixpress.ci.teamcity.domain.DependenciesResult;
-import com.wixpress.ci.teamcity.domain.MavenDependenciesResult;
-import com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer;
 import com.wixpress.ci.teamcity.domain.LogMessage;
 import com.wixpress.ci.teamcity.domain.LogMessageType;
-import com.wixpress.ci.teamcity.teamCityAnalyzer.TeamCityBuildDependenciesAnalyzer;
+import com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypesDependencyAnalyzer;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.users.SUser;
@@ -30,9 +28,9 @@ public class DependenciesTabExtension extends BuildTypeTab {
     private DependenciesAnalyzer dependenciesAnalyzer;
     private final ObjectMapper objectMapper;
 
-    public DependenciesTabExtension(WebControllerManager manager, ProjectManager projectManager, TeamCityBuildDependenciesAnalyzer dependenciesAnalyzer, ObjectMapper objectMapper) {
+    public DependenciesTabExtension(WebControllerManager manager, ProjectManager projectManager, BuildTypesDependencyAnalyzer buildTypesAnalyzer, ObjectMapper objectMapper) {
         super("wix-maven-3-teamcity-plugin", "Maven 3 Dependencies", manager, projectManager, "dependenciesTab.jsp");
-        this.dependenciesAnalyzer = dependenciesAnalyzer;
+        this.dependenciesAnalyzer = buildTypesAnalyzer;
         this.objectMapper = objectMapper;
     }
 

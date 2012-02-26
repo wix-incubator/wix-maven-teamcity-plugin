@@ -22,7 +22,7 @@ import static com.google.common.collect.Maps.newHashMap;
  * @author yoav
  * @since 2/16/12
  */
-public class TeamCityBuildMavenDependenciesAnalyzer implements DependenciesAnalyzer<MavenDependenciesResult> {
+public class MavenBuildTypeDependenciesAnalyzer implements DependenciesAnalyzer<MavenDependenciesResult> {
 
     private static final File tempDir = new File(System.getProperty( "java.io.tmpdir" ));
     private MavenProjectDependenciesAnalyzer mavenDependenciesAnalyzer;
@@ -30,7 +30,7 @@ public class TeamCityBuildMavenDependenciesAnalyzer implements DependenciesAnaly
     private CollectDependenciesExecutor executor;
     private DependenciesDao dependenciesDao;
 
-    public TeamCityBuildMavenDependenciesAnalyzer(MavenBooter mavenBooter, DependenciesDao dependenciesDao, MavenProjectDependenciesAnalyzer mavenProjectDependenciesAnalyzer, CollectDependenciesExecutor executor) {
+    public MavenBuildTypeDependenciesAnalyzer(MavenBooter mavenBooter, DependenciesDao dependenciesDao, MavenProjectDependenciesAnalyzer mavenProjectDependenciesAnalyzer, CollectDependenciesExecutor executor) {
         this.mavenBooter = mavenBooter;
         this.mavenDependenciesAnalyzer = mavenProjectDependenciesAnalyzer;
         this.dependenciesDao = dependenciesDao;

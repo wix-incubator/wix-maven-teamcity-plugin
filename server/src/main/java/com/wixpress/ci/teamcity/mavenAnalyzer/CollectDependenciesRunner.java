@@ -24,26 +24,26 @@ class CollectDependenciesRunner implements Runnable {
     private DateTime completedTime = null;
     private boolean completed = false;
     private boolean isError = false;
-    private TeamCityBuildMavenDependenciesAnalyzer teamCityBuildMavenDependenciesAnalyzer;
+    private MavenBuildTypeDependenciesAnalyzer mavenBuildAnalyzer;
 
 
-    public CollectDependenciesRunner(TeamCityBuildMavenDependenciesAnalyzer teamCityBuildMavenDependenciesAnalyzer, SBuildType buildType) {
-        this.teamCityBuildMavenDependenciesAnalyzer = teamCityBuildMavenDependenciesAnalyzer;
+    public CollectDependenciesRunner(MavenBuildTypeDependenciesAnalyzer mavenBuildAnalyzer, SBuildType buildType) {
+        this.mavenBuildAnalyzer = mavenBuildAnalyzer;
         this.buildType = buildType;
     }
 
     public void run() {
         try {
-            BuildTypeWorkspaceFilesystem workspaceFilesystem = new BuildTypeWorkspaceFilesystem(TeamCityBuildMavenDependenciesAnalyzer.getTempDir(), buildType);
+            BuildTypeWorkspaceFilesystem workspaceFilesystem = new BuildTypeWorkspaceFilesystem(MavenBuildTypeDependenciesAnalyzer.getTempDir(), buildType);
             try {
-                MavenWorkspaceReader workspaceReader =  teamCityBuildMavenDependenciesAnalyzer.getMavenBooter().newWorkspaceReader(workspaceFilesystem, new LoggingMavenWorkspaceListener(listenerLogger));
-                MavenRepositorySystemSession session = teamCityBuildMavenDependenciesAnalyzer.getMavenBooter().newRepositorySystemSession(new LoggingTransferListener(listenerLogger), new LoggingRepositoryListener(listenerLogger));
+                MavenWorkspaceReader workspaceReader =  mavenBuildAnalyzer.getMavenBooter().newWorkspaceReader(workspaceFilesystem, new LoggingMavenWorkspaceListener(listenerLogger));
+                MavenRepositorySystemSession session = mavenBuildAnalyzer.getMavenBooter().newRepositorySystemSession(new LoggingTransferListener(listenerLogger), new LoggingRepositoryListener(listenerLogger));
                 session.setWorkspaceReader(workspaceReader);
 
-                MModule mModule = teamCityBuildMavenDependenciesAnalyzer.getMavenDependenciesAnalyzer()
+                MModule mModule = mavenBuildAnalyzer.getMavenDependenciesAnalyzer()
                         .getModuleDependencies(workspaceReader.getRootModule(), session, new LoggingDependenciesAnalyzerListener(listenerLogger));
 //                mModule.accept(new LoggingModuleVisitor(listenerLogger));
-                teamCityBuildMavenDependenciesAnalyzer.save(mModule, buildType, listenerLogger);
+                mavenBuildAnalyzer.save(mModule, buildType, listenerLogger);
                 listenerLogger.completedCollectingDependencies(buildType);
             }
             finally {
@@ -55,7 +55,7 @@ class CollectDependenciesRunner implements Runnable {
             isError = true;
             listenerLogger.failedCollectingDependencies(buildType, e);
             try {
-                teamCityBuildMavenDependenciesAnalyzer.saveError(buildType, listenerLogger);
+                mavenBuildAnalyzer.saveError(buildType, listenerLogger);
             } catch (Exception e1) {
                 // ignore this error
             }

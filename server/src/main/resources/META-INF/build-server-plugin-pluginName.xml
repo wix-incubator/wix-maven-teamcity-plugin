@@ -17,9 +17,9 @@
         <constructor-arg index="1" ref="repositorySystem"/>
     </bean>
     <bean id="executor" class="com.wixpress.ci.teamcity.mavenAnalyzer.CollectDependenciesExecutor" destroy-method="shutdown"/>
-    <bean id="mavenDependenciesAnalyzer" class="com.wixpress.ci.teamcity.mavenAnalyzer.TeamCityBuildMavenDependenciesAnalyzer"/>
+    <bean id="mavenDependenciesAnalyzer" class="com.wixpress.ci.teamcity.mavenAnalyzer.MavenBuildTypeDependenciesAnalyzer"/>
 
-    <bean class="com.wixpress.ci.teamcity.teamCityAnalyzer.TeamCityBuildDependenciesAnalyzer">
+    <bean class="com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypesDependencyAnalyzer">
         <constructor-arg ref="mavenDependenciesAnalyzer"/>
         <constructor-arg ref="projectManager"/>
     </bean>
