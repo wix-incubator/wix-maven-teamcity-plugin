@@ -38,7 +38,7 @@ public class MavenDependenciesResult implements DependenciesResult {
         this.module = module;
     }
 
-    protected MavenDependenciesResult(ResultType resultType, MModule module, List<LogMessage> fullTrace) {
+    public MavenDependenciesResult(ResultType resultType, MModule module, List<LogMessage> fullTrace) {
         this.resultType = resultType;
         this.module = module;
         this.fullTrace = fullTrace;

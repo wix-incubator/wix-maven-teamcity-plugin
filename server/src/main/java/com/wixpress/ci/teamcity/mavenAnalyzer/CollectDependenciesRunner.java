@@ -34,6 +34,7 @@ class CollectDependenciesRunner implements Runnable {
 
     public void run() {
         try {
+            listenerLogger.info(String.format("Starting collection of dependencies for %s:%s", buildType.getProjectName(), buildType.getName()));
             BuildTypeWorkspaceFilesystem workspaceFilesystem = new BuildTypeWorkspaceFilesystem(MavenBuildTypeDependenciesAnalyzer.getTempDir(), buildType);
             try {
                 MavenWorkspaceReader workspaceReader =  mavenBuildAnalyzer.getMavenBooter().newWorkspaceReader(workspaceFilesystem, new LoggingMavenWorkspaceListener(listenerLogger));

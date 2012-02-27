@@ -2,6 +2,7 @@
 <jsp:useBean id="fullTrace" scope="request" type="java.lang.String"/>
 <jsp:useBean id="resultType" scope="request" type="java.lang.String"/>
 <jsp:useBean id="buildTypeId" scope="request" type="java.lang.String"/>
+<jsp:useBean id="buildTypeDependencies" scope="request" type="java.lang.String"/>
 <%@ include file="/include.jsp" %>
 <style type="text/css">
     .tree-div {width: 100%; line-height: 1.0em;}
@@ -37,6 +38,7 @@
             progressToken: 0,
 
             init: function(dependencies, resultType, fullTrace) {
+                jQuery("#dep-message").empty();
                 switch (resultType) {
                     case "current":
                         this.renderTree("dep-target", dependencies);
@@ -51,7 +53,7 @@
                         break;
                     case "runningAsync":
                         jQuery("#dep-message").html("<p>Dependencies collection is running...</p>");
-                        this.startProgressPuller(buildTypeId)
+                        this.startProgressPuller(buildTypeId);
                         break;
                     case "notRun":
                         jQuery("#dep-message").html("<p>Dependencies collection was not run for the current build configuration</p>");
@@ -302,12 +304,12 @@
                     method: 'get',
                     parameters: {action:"getBuildDependencies", id:buildTypeId},
                     onSuccess: function(transport){
-                        jQuery("#dep-message").empty();
-                        if (transport.responseJSON.resultType == "current" ||
-                                transport.responseJSON.resultType == "needsRefresh") {
-                            DA.renderTree("dep-target", transport.responseJSON.module);
-                            jQuery("#dep-message").empty();
-                        }
+                        DA.init(transport.responseJSON.module, transport.responseJSON.resultType, transport.responseJSON.fullTrace, transport.responseJSON.sortedDependencies)
+//                        if (transport.responseJSON.resultType == "current" ||
+//                                transport.responseJSON.resultType == "needsRefresh") {
+//                            DA.renderTree("dep-target", transport.responseJSON.module);
+//                            jQuery("#dep-message").empty();
+//                        }
                     },
                     onFailure: function(){ alert('Failed to start collecting dependencies') }
                 });
@@ -330,5 +332,6 @@
     var resultType = "${resultType}";
     var fullTrace = ${fullTrace};
     var buildTypeId = "${buildTypeId}";
-    DA.init(dependencies, resultType, fullTrace);
+    var buildTypeDependencies = ${buildTypeDependencies};
+    DA.init(dependencies, resultType, fullTrace, buildTypeDependencies);
 </script>

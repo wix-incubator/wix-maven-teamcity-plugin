@@ -206,10 +206,10 @@ public class Matchers {
         return new TypeSafeMatcher<MBuildType>() {
             @Override
             public boolean matchesSafely(MBuildType item) {
-                return item.getBuildTypeId().equals(buildTypeId) &&
-                        item.getName().equals(name) &&
-                        item.getProjectId().equals(projectId) &&
-                        item.getProjectName().equals(projectName);
+                return item.getBuildTypeId().getBuildTypeId().equals(buildTypeId) &&
+                        item.getBuildTypeId().getName().equals(name) &&
+                        item.getBuildTypeId().getProjectId().equals(projectId) &&
+                        item.getBuildTypeId().getProjectName().equals(projectName);
             }
 
             public void describeTo(Description description) {

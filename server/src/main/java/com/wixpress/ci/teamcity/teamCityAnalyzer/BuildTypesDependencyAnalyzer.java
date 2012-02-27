@@ -6,8 +6,7 @@ import com.wixpress.ci.teamcity.mavenAnalyzer.MavenBuildTypeDependenciesAnalyzer
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
+import java.util.List;
 
 /**
  * analyzes the dependencies between TeamCity build configurations based on Maven dependencies
@@ -19,11 +18,13 @@ public class BuildTypesDependencyAnalyzer implements DependenciesAnalyzer<BuildD
     private MavenBuildTypeDependenciesAnalyzer mavenBuildAnalyzer;
     private ProjectManager projectManager;
     private BuildTypeDependenciesDecorator dependenciesDecorator;
+    private BuildTypeDependenciesSorter dependenciesSorter;
 
-    public BuildTypesDependencyAnalyzer(MavenBuildTypeDependenciesAnalyzer mavenBuildAnalyzer, ProjectManager projectManager, BuildTypeDependenciesDecorator dependenciesDecorator) {
+    public BuildTypesDependencyAnalyzer(MavenBuildTypeDependenciesAnalyzer mavenBuildAnalyzer, ProjectManager projectManager, BuildTypeDependenciesDecorator dependenciesDecorator, BuildTypeDependenciesSorter dependenciesSorter) {
         this.mavenBuildAnalyzer = mavenBuildAnalyzer;
         this.projectManager = projectManager;
         this.dependenciesDecorator = dependenciesDecorator;
+        this.dependenciesSorter = dependenciesSorter;
     }
 
     public BuildDependenciesResult getBuildDependencies(SBuildType buildType) {
@@ -38,7 +39,7 @@ public class BuildTypesDependencyAnalyzer implements DependenciesAnalyzer<BuildD
     public BuildDependenciesResult getBuildDependencies(SBuildType buildType, boolean checkForNewerRevision) {
         MavenDependenciesResult mavenResult = mavenBuildAnalyzer.getBuildDependencies(buildType, checkForNewerRevision);
         if (mavenResult.getResultType().hasDependencies())
-            return dependenciesDecorator.decorateWithBuildTypesAnalysis(mavenResult, buildType);
+            return analyzeBuildTypeDependencies(buildType, mavenResult);
         else
             return toBuildDependenciesResult(mavenResult, buildType);
     }
@@ -46,9 +47,22 @@ public class BuildTypesDependencyAnalyzer implements DependenciesAnalyzer<BuildD
     public BuildDependenciesResult analyzeDependencies(SBuildType buildType) {
         MavenDependenciesResult mavenResult = mavenBuildAnalyzer.analyzeDependencies(buildType);
         if (mavenResult.getResultType().hasDependencies())
-            return dependenciesDecorator.decorateWithBuildTypesAnalysis(mavenResult, buildType);
+            return analyzeBuildTypeDependencies(buildType, mavenResult);
         else
             return toBuildDependenciesResult(mavenResult, buildType);
+    }
+
+    private BuildDependenciesResult analyzeBuildTypeDependencies(SBuildType buildType, MavenDependenciesResult mavenResult) {
+        MavenDependenciesResult mavenDependenciesResult = dependenciesDecorator.decorateWithBuildTypesAnalysis(mavenResult, buildType);
+        try {
+            List<BuildTypeId> sortedBuildTypeDependencies = dependenciesSorter.sortBuildTypes(mavenDependenciesResult.getModule(), new BuildTypeId(buildType));
+            return new BuildDependenciesResult(mavenDependenciesResult, buildType, sortedBuildTypeDependencies);
+        }
+        catch (IllegalStateException e) {
+            BuildDependenciesResult buildDependenciesResult = new BuildDependenciesResult(mavenDependenciesResult, buildType);
+            buildDependenciesResult.getFullTrace().add(new LogMessage("failed to sort build dependencies", LogMessageType.error, e));
+            return buildDependenciesResult;
+        }
     }
 
     public BuildDependenciesResult forceAnalyzeDependencies(SBuildType buildType) {

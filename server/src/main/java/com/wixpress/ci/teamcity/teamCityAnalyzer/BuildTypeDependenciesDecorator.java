@@ -5,8 +5,10 @@ import com.wixpress.ci.teamcity.mavenAnalyzer.MavenBuildTypeDependenciesAnalyzer
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
 
+import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
@@ -24,11 +26,11 @@ class BuildTypeDependenciesDecorator {
     }
 
 
-    public BuildDependenciesResult decorateWithBuildTypesAnalysis(MavenDependenciesResult mavenResult, SBuildType buildType) {
+    public MavenDependenciesResult decorateWithBuildTypesAnalysis(MavenDependenciesResult mavenResult, SBuildType buildType) {
         RequestCache requestCache = new RequestCache();
         requestCache.put(buildType, mavenResult);
         Map<ArtifactId, BuildTypeId> artifactBuildMapping = readArtifactModuleMapping(requestCache);
-        return new BuildDependenciesResult(mavenResult, decorateDependenciesWithBuilds(mavenResult.getModule(), artifactBuildMapping), buildType);
+        return new MavenDependenciesResult(mavenResult.getResultType(), decorateDependenciesWithBuilds(mavenResult.getModule(), artifactBuildMapping), mavenResult.getFullTrace());
     }
 
     private Map<ArtifactId, BuildTypeId> readArtifactModuleMapping(RequestCache requestCache) {
@@ -52,17 +54,27 @@ class BuildTypeDependenciesDecorator {
 
     private MDependency decorateDependenciesWithBuilds(MDependency mDependency, Map<ArtifactId, BuildTypeId> artifactBuildMapping) {
         ArtifactId dependencyArtifactId = new ArtifactId(mDependency);
+
+        List<MDependency> dependencies = newArrayList();
+        boolean hasChildBuildTypeDependency = false;
+        for (MDependency subDependency : mDependency.getDependencies()) {
+            MDependency childDependency = decorateDependenciesWithBuilds(subDependency, artifactBuildMapping);
+            hasChildBuildTypeDependency = hasChildBuildTypeDependency || childDependency instanceof MBuildTypeDependency;
+            dependencies.add(childDependency);
+        }
+
         MDependency decoratedDependency;
         if (artifactBuildMapping.containsKey(dependencyArtifactId)) {
             BuildTypeId buildTypeId = artifactBuildMapping.get(dependencyArtifactId);
             decoratedDependency = new MBuildTypeDependency(mDependency, buildTypeId);
         }
+        else if (hasChildBuildTypeDependency) {
+            decoratedDependency = new MBuildTypeDependency(mDependency, new BuildTypeId("unknown", "unknown", mDependency.getGroupId(), mDependency.getArtifactId(), false));
+        }
         else
             decoratedDependency = new MDependency(mDependency);
 
-        decoratedDependency.getDependencies().clear();
-        for (MDependency subDependency : mDependency.getDependencies())
-            decoratedDependency.getDependencies().add(decorateDependenciesWithBuilds(subDependency, artifactBuildMapping));
+        decoratedDependency.setDependencies(dependencies);
         return decoratedDependency;
     }
 

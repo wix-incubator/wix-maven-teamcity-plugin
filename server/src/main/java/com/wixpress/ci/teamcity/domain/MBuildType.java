@@ -12,10 +12,7 @@ import static com.google.common.collect.Lists.newArrayList;
  */
 public class MBuildType implements Tree<MBuildType>{
 
-    private String name;
-    private String projectName;
-    private String buildTypeId;
-    private String projectId;
+    private BuildTypeId buildTypeId = new BuildTypeId();
     private List<MBuildType> dependencies = newArrayList();
 
     public MBuildType() {
@@ -23,10 +20,7 @@ public class MBuildType implements Tree<MBuildType>{
     }
 
     public MBuildType(String name, String projectName, String buildTypeId, String projectId) {
-        this.name = name;
-        this.projectName = projectName;
-        this.buildTypeId = buildTypeId;
-        this.projectId = projectId;
+        this.buildTypeId = new BuildTypeId(name, projectName, buildTypeId, projectId);
     }
 
     public MBuildType(SBuildType buildType) {
@@ -41,47 +35,23 @@ public class MBuildType implements Tree<MBuildType>{
     public String toString() {
         return new StringBuilder()
                 .append("MBuildType(")
-                .append(projectName)
+                .append(buildTypeId.getProjectName())
                 .append(":")
-                .append(name)
+                .append(buildTypeId.getName())
                 .append("(")
-                .append(projectId)
+                .append(buildTypeId.getProjectId())
                 .append("-")
-                .append(buildTypeId)
+                .append(buildTypeId.getBuildTypeId())
                 .append(")")
                 .toString();
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getProjectName() {
-        return projectName;
-    }
-
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
-
-    public String getBuildTypeId() {
+    public BuildTypeId getBuildTypeId() {
         return buildTypeId;
     }
 
-    public void setBuildTypeId(String buildTypeId) {
+    public void setBuildTypeId(BuildTypeId buildTypeId) {
         this.buildTypeId = buildTypeId;
-    }
-
-    public String getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
     }
 
     public List<MBuildType> getDependencies() {

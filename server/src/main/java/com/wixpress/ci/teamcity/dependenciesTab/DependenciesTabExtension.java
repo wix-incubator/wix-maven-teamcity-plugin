@@ -1,6 +1,7 @@
 package com.wixpress.ci.teamcity.dependenciesTab;
 
 import com.wixpress.ci.teamcity.DependenciesAnalyzer;
+import com.wixpress.ci.teamcity.domain.BuildDependenciesResult;
 import com.wixpress.ci.teamcity.domain.DependenciesResult;
 import com.wixpress.ci.teamcity.domain.LogMessage;
 import com.wixpress.ci.teamcity.domain.LogMessageType;
@@ -25,7 +26,7 @@ import static com.google.common.collect.Lists.newArrayList;
  */
 public class DependenciesTabExtension extends BuildTypeTab {
 
-    private DependenciesAnalyzer dependenciesAnalyzer;
+    private BuildTypesDependencyAnalyzer dependenciesAnalyzer;
     private final ObjectMapper objectMapper;
 
     public DependenciesTabExtension(WebControllerManager manager, ProjectManager projectManager, BuildTypesDependencyAnalyzer buildTypesAnalyzer, ObjectMapper objectMapper) {
@@ -37,7 +38,7 @@ public class DependenciesTabExtension extends BuildTypeTab {
     @Override
     protected void fillModel(Map model, HttpServletRequest request, @NotNull SBuildType buildType, SUser user) {
         try {
-            DependenciesResult dependenciesResult = dependenciesAnalyzer.analyzeDependencies(buildType);
+            BuildDependenciesResult dependenciesResult = dependenciesAnalyzer.analyzeDependencies(buildType);
             model.put("resultType", dependenciesResult.getResultType().name());
             model.put("buildTypeId", buildType.getBuildTypeId());
             switch (dependenciesResult.getResultType()) {
@@ -45,21 +46,25 @@ public class DependenciesTabExtension extends BuildTypeTab {
                 case needsRefresh:
                     model.put("module", objectMapper.writeValueAsString(dependenciesResult.getModule()));
                     model.put("fullTrace", "{}");
+                    model.put("buildTypeDependencies", objectMapper.writeValueAsString(dependenciesResult.getSortedDependencies()));
                     break;
                 case exception:
                     model.put("module", "{}");
                     model.put("fullTrace", objectMapper.writeValueAsString(dependenciesResult.getFullTrace()));
+                    model.put("buildTypeDependencies", "{}");
                     break;
                 case notRun:
                 case runningAsync:
                     model.put("module", "{}");
                     model.put("fullTrace", "{}");
+                    model.put("buildTypeDependencies", "{}");
             }
         } catch (Exception e) {
             model.put("module", "{}");
             model.put("fullTrace", serializeException(e));
             model.put("resultType", "error");
             model.put("buildTypeId", buildType.getBuildTypeId());
+            model.put("buildTypeDependencies", "{}");
         }
     }
 
