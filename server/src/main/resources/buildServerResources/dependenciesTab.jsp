@@ -21,7 +21,7 @@
     .provided {font-size:10px; color:#666;background-color: #ddd; border:solid #666 1px; display:inline-block;border-radius: 4px; padding:0 3px;}
     .optional {font-size:10px; color:#5A6986;background-color: #DEE5F2; border:solid #5A6986 1px; display:inline-block;border-radius: 4px; padding:0 3px;}
     .build-type-label {font-size:10px; color: #274c85;background-color: #DEE5F2; border:solid #274c85 1px; display:inline-block;border-radius: 4px; padding:0 3px;}
-    .build-plan-item {font-size:12px; color: #274c85;display:inline-block;border-radius: 4px; padding:0 3px; height: 15px; }
+    .build-plan-item {font-size:12px; color: #274c85;padding:0 3px; height: 15px;text-decoration: none;}
     .requires-build-label {font-size:10px; color: #781515;background-color: #fcc3c4; border:solid #781515 1px; display:inline-block;border-radius: 4px; padding:0 3px;height: 13px}
     .groupBox{padding: 4px 0 0 5px}
     .module-dependencies-div{padding: 10px}
@@ -92,8 +92,16 @@
                 var html = "<ul>";
                 for (var d=0; d < buildPlanItems.length; d++) {
                     var item = buildPlanItems[d];
-                    html += "<li style=\'line-height: 1em;\'>"+ (item.needsBuild?"<div class=\'requires-build-label\'>Requires Building</div>":"")+ "<div class=\'build-plan-item\'>"+
-                            item.buildTypeId.projectName +":" + item.buildTypeId.name + "</div>" +
+                    var renderLink = (d>0) && item.buildTypeId.known;
+                    var thisItem = d==0;
+                    html += "<li style=\'line-height: 1em;\'>"+
+                            (item.needsBuild?"<div class=\'requires-build-label\'>Requires Building</div>":"")+
+                            (thisItem?"<div class=\'module\'>this</div>  ":"")+
+                            (renderLink?"<a href=\'/viewType.html?buildTypeId="+item.buildTypeId.buildTypeId+"\' target=\'_blank\'>":"") +
+                            "<span class=\'build-plan-item\'>"+
+                            item.buildTypeId.projectName +":" + item.buildTypeId.name +
+                            "</span>" +
+                            (renderLink?"</a>":"") +
                             (item.needsBuild?" - " + item.description:"") + "</li>";
                 }
                 html += "</ul>";
