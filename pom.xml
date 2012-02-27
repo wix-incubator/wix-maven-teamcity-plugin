@@ -7,7 +7,7 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>teamcity maven 3 dependencies plugin</name>
+  <name>teamcity maven dependencies plugin</name>
 
   <properties>
     <teamcity.version>6.5.5</teamcity.version>

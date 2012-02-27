@@ -11,6 +11,7 @@
     <groupId>com.wixpress.ci.teamcity</groupId>
     <artifactId>server</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>teamcity maven dependencies plugin server</name>
 
     <properties>
         <aetherVersion>1.13.1</aetherVersion>

@@ -12,34 +12,23 @@ import static com.google.common.collect.Lists.newArrayList;
  */
 public class BuildDependenciesResult extends MavenDependenciesResult {
 
-    private MBuildType buildType;
-    private List<BuildTypeId> sortedDependencies;
+    private List<MBuildPlanItem> buildPlan;
 
     public BuildDependenciesResult(MavenDependenciesResult mavenResult, SBuildType buildType) {
         super(mavenResult.getResultType(), mavenResult.getModule(), mavenResult.getFullTrace());
-        this.buildType = new MBuildType(buildType);
-        this.sortedDependencies = newArrayList();
+        this.buildPlan = newArrayList();
     }
 
-    public BuildDependenciesResult(MavenDependenciesResult mavenResult, SBuildType buildType, List<BuildTypeId> sortedDependencies) {
+    public BuildDependenciesResult(MavenDependenciesResult mavenResult, SBuildType buildType, List<MBuildPlanItem> buildPlan) {
         super(mavenResult.getResultType(), mavenResult.getModule(), mavenResult.getFullTrace());
-        this.buildType = new MBuildType(buildType);
-        this.sortedDependencies = sortedDependencies;
+        this.buildPlan = buildPlan;
     }
 
-    public MBuildType getBuildType() {
-        return buildType;
+    public List<MBuildPlanItem> getBuildPlan() {
+        return buildPlan;
     }
 
-    public void setBuildType(MBuildType buildType) {
-        this.buildType = buildType;
-    }
-
-    public List<BuildTypeId> getSortedDependencies() {
-        return sortedDependencies;
-    }
-
-    public void setSortedDependencies(List<BuildTypeId> sortedDependencies) {
-        this.sortedDependencies = sortedDependencies;
+    public void setBuildPlan(List<MBuildPlanItem> buildPlan) {
+        this.buildPlan = buildPlan;
     }
 }

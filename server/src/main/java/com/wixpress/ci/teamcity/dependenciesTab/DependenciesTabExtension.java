@@ -46,25 +46,25 @@ public class DependenciesTabExtension extends BuildTypeTab {
                 case needsRefresh:
                     model.put("module", objectMapper.writeValueAsString(dependenciesResult.getModule()));
                     model.put("fullTrace", "{}");
-                    model.put("buildTypeDependencies", objectMapper.writeValueAsString(dependenciesResult.getSortedDependencies()));
+                    model.put("buildPlan", objectMapper.writeValueAsString(dependenciesResult.getBuildPlan()));
                     break;
                 case exception:
                     model.put("module", "{}");
                     model.put("fullTrace", objectMapper.writeValueAsString(dependenciesResult.getFullTrace()));
-                    model.put("buildTypeDependencies", "{}");
+                    model.put("buildPlan", "{}");
                     break;
                 case notRun:
                 case runningAsync:
                     model.put("module", "{}");
                     model.put("fullTrace", "{}");
-                    model.put("buildTypeDependencies", "{}");
+                    model.put("buildPlan", "{}");
             }
         } catch (Exception e) {
             model.put("module", "{}");
             model.put("fullTrace", serializeException(e));
             model.put("resultType", "error");
             model.put("buildTypeId", buildType.getBuildTypeId());
-            model.put("buildTypeDependencies", "{}");
+            model.put("buildPlan", "{}");
         }
     }
 

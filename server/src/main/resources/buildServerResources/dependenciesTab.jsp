@@ -2,7 +2,7 @@
 <jsp:useBean id="fullTrace" scope="request" type="java.lang.String"/>
 <jsp:useBean id="resultType" scope="request" type="java.lang.String"/>
 <jsp:useBean id="buildTypeId" scope="request" type="java.lang.String"/>
-<jsp:useBean id="buildTypeDependencies" scope="request" type="java.lang.String"/>
+<jsp:useBean id="buildPlan" scope="request" type="java.lang.String"/>
 <%@ include file="/include.jsp" %>
 <style type="text/css">
     .tree-div {width: 100%; line-height: 1.0em;}
@@ -21,6 +21,8 @@
     .provided {font-size:10px; color:#666;background-color: #ddd; border:solid #666 1px; display:inline-block;border-radius: 4px; padding:0 3px;}
     .optional {font-size:10px; color:#5A6986;background-color: #DEE5F2; border:solid #5A6986 1px; display:inline-block;border-radius: 4px; padding:0 3px;}
     .build-type-label {font-size:10px; color: #274c85;background-color: #DEE5F2; border:solid #274c85 1px; display:inline-block;border-radius: 4px; padding:0 3px;}
+    .build-plan-item {font-size:12px; color: #274c85;display:inline-block;border-radius: 4px; padding:0 3px; height: 15px; }
+    .requires-build-label {font-size:10px; color: #781515;background-color: #fcc3c4; border:solid #781515 1px; display:inline-block;border-radius: 4px; padding:0 3px;height: 13px}
     .groupBox{padding: 4px 0 0 5px}
     .module-dependencies-div{padding: 10px}
 
@@ -37,36 +39,70 @@
         return {
             progressToken: 0,
 
-            init: function(dependencies, resultType, fullTrace) {
+            init: function(dependencies, resultType, fullTrace, buildPlan) {
                 jQuery("#dep-message").empty();
                 switch (resultType) {
                     case "current":
-                        this.renderTree("dep-target", dependencies);
+                        this.renderBuildPlan("#dep-build-dependencies", buildPlan)
+                        this.renderTree("#dep-module-dependencies", dependencies);
+                        this.showTitles(true, true, false);
                         break;
                     case "needsRefresh":
                         jQuery("#dep-message").html("<p>New revisions detected in VCS. Project structure may have changed. It is suggested to refresh the dependencies.</p>");
-                        this.renderTree("dep-target", dependencies);
+                        this.renderBuildPlan("#dep-build-dependencies", buildPlan)
+                        this.renderTree("#dep-module-dependencies", dependencies);
+                        this.showTitles(true, true, true);
                         break;
                     case "exception":
                         jQuery("#dep-message").html("<h3>Exception during Dependencies Collection</h3>");
+                        this.showTitles(false, false, true);
                         this.renderTrace("dep-message", fullTrace);
                         break;
                     case "runningAsync":
                         jQuery("#dep-message").html("<p>Dependencies collection is running...</p>");
+                        this.showTitles(false, false, true);
                         this.startProgressPuller(buildTypeId);
                         break;
                     case "notRun":
                         jQuery("#dep-message").html("<p>Dependencies collection was not run for the current build configuration</p>");
+                        this.showTitles(false, false, true);
                         break;
                     default:
                         jQuery("#dep-message").html("<p>Should not get here - got unexpected result type ["+resultType+"]</p>");
+                        this.showTitles(false, false, true);
                 }
             },
 
+            showTitles: function(build, module, messages) {
+                if (build)
+                    jQuery("#h2-build-dependencies").show();
+                else
+                    jQuery("#h2-build-dependencies").hide();
+                if (module)
+                    jQuery("#h2-module-dependencies").show();
+                else
+                    jQuery("#h2-module-dependencies").hide();
+                if (messages)
+                    jQuery("#h2-message").show();
+                else
+                    jQuery("#h2-message").hide();
+            },
+
+            renderBuildPlan: function (target, buildPlanItems) {
+                var html = "<ul>";
+                for (var d=0; d < buildPlanItems.length; d++) {
+                    var item = buildPlanItems[d];
+                    html += "<li style=\'line-height: 1em;\'>"+ (item.needsBuild?"<div class=\'requires-build-label\'>Requires Building</div>":"")+ "<div class=\'build-plan-item\'>"+
+                            item.buildTypeId.projectName +":" + item.buildTypeId.name + "</div>" +
+                            (item.needsBuild?" - " + item.description:"") + "</li>";
+                }
+                html += "</ul>";
+                jQuery(target).html(html)
+            },
+
             renderTree: function (target, module) {
-                var divTarget = document.getElementById(target);
                 this.markDependenciesWhoAreModules(module);
-                divTarget.innerHTML = this.renderModule(module);
+                jQuery(target).html(this.renderModule(module))
             },
 
             renderModule: function (module) {
@@ -265,7 +301,9 @@
                     method: 'get',
                     parameters: {action:"forceAnalyzeDependencies", id:buildTypeId},
                     onSuccess: function(transport){
-                        jQuery("#dep-target").empty();
+                        this.showTitles(false, false, true);
+                        jQuery("#dep-build-dependencies").empty();
+                        jQuery("#dep-module-dependencies").empty();
                         jQuery("#dep-message").empty();
                         DA.startProgressPuller(buildTypeId);
                     },
@@ -293,9 +331,6 @@
                         },
                         onFailure: function(){ }
                     });
-
-//                  if (!confirm('Want me to annoy you again later?'))
-//                    pe.stop();
                 }, 2);
             },
 
@@ -304,14 +339,9 @@
                     method: 'get',
                     parameters: {action:"getBuildDependencies", id:buildTypeId},
                     onSuccess: function(transport){
-                        DA.init(transport.responseJSON.module, transport.responseJSON.resultType, transport.responseJSON.fullTrace, transport.responseJSON.sortedDependencies)
-//                        if (transport.responseJSON.resultType == "current" ||
-//                                transport.responseJSON.resultType == "needsRefresh") {
-//                            DA.renderTree("dep-target", transport.responseJSON.module);
-//                            jQuery("#dep-message").empty();
-//                        }
+                        DA.init(transport.responseJSON.module, transport.responseJSON.resultType, transport.responseJSON.fullTrace, transport.responseJSON.buildPlan)
                     },
-                    onFailure: function(){ alert('Failed to start collecting dependencies') }
+                    onFailure: function(){ alert('Failed to get dependencies') }
                 });
             }
 
@@ -319,8 +349,11 @@
 
 </script>
 <div class="module-dependencies-div">
-    <h2 class="groupTitle">Module Dependencies:</h2>
-    <div id="dep-target" class="groupBox"></div>
+    <h2  id="h2-build-dependencies" class="groupTitle">Build Dependencies:</h2>
+    <div id="dep-build-dependencies" class="groupBox"></div>
+    <h2  id="h2-module-dependencies" class="groupTitle">Module Dependencies:</h2>
+    <div id="dep-module-dependencies" class="groupBox"></div>
+    <h2  id="h2-message" class="groupTitle">Messages:</h2>
     <div id="dep-message" class="groupBox"></div>
     <div id="dep-actions" class="groupBox">
         <input title="Click to run Maven dependencies collection" id="refreshDependencies" type="button" class="action"
@@ -332,6 +365,6 @@
     var resultType = "${resultType}";
     var fullTrace = ${fullTrace};
     var buildTypeId = "${buildTypeId}";
-    var buildTypeDependencies = ${buildTypeDependencies};
-    DA.init(dependencies, resultType, fullTrace, buildTypeDependencies);
+    var buildPlan = ${buildPlan};
+    DA.init(dependencies, resultType, fullTrace, buildPlan);
 </script>

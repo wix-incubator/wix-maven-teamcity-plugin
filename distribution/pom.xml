@@ -11,6 +11,7 @@
   <groupId>com.wixpress.ci.teamcity</groupId>
   <artifactId>distribution</artifactId>
   <version>1.0-SNAPSHOT</version>
+    <name>teamcity maven dependencies plugin distribution</name>
 
   <dependencies>
     <dependency>

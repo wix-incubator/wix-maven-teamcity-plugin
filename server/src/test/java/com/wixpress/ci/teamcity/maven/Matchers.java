@@ -3,7 +3,6 @@ package com.wixpress.ci.teamcity.maven;
 import com.wixpress.ci.teamcity.domain.*;
 import com.wixpress.ci.teamcity.maven.workspace.MavenModule;
 import org.hamcrest.*;
-import org.sonatype.aether.graph.DependencyNode;
 
 import java.util.List;
 
@@ -202,20 +201,27 @@ public class Matchers {
         };
     }
     
-    public static Matcher<MBuildType> IsMBuildType(final String name, final String projectName, final String buildTypeId, final String projectId) {
-        return new TypeSafeMatcher<MBuildType>() {
-            private Matcher<BuildTypeId> buildTypeIdMatcher = IsBuildTypeId(name, projectName, buildTypeId, projectId);
+    public static Matcher<MBuildPlanItem> IsMBuildPlanItem(final Matcher<BuildTypeId> buildTypeIdMatcher, final boolean needsBuild, final Matcher<String> descriptionMatcher) {
+        return new TypeSafeMatcher<MBuildPlanItem>() {
 
             @Override
-            public boolean matchesSafely(MBuildType item) {
-                return buildTypeIdMatcher.matches(item.getBuildTypeId());
+            public boolean matchesSafely(MBuildPlanItem item) {
+                return buildTypeIdMatcher.matches(item.getBuildTypeId()) &&
+                        item.isNeedsBuild() == needsBuild &&
+                        descriptionMatches(item);
+            }
+
+            private boolean descriptionMatches(MBuildPlanItem item) {
+                return !needsBuild || (descriptionMatcher.matches(item.getDescription()));
             }
 
             public void describeTo(Description description) {
-                description.appendText("MBuildType(")
+                description.appendText("MBuildPlanItem(")
                         .appendDescriptionOf(buildTypeIdMatcher)
-                        .appendText(")")
-                ;
+                        .appendText(",");
+                if (needsBuild)
+                        description.appendText("needsBuild - ").appendDescriptionOf(descriptionMatcher);
+                description.appendText(")");
             }
         };
     }
