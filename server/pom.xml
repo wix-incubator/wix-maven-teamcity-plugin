@@ -10,13 +10,13 @@
 
     <groupId>com.wixpress.ci.teamcity</groupId>
     <artifactId>server</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <name>teamcity maven dependencies plugin server</name>
 
     <properties>
         <aetherVersion>1.13.1</aetherVersion>
         <mavenVersion>3.0.4</mavenVersion>
-        <wagonVersion>1.1</wagonVersion>
+        <wagonVersion>1.0</wagonVersion>
     </properties>
 
 
