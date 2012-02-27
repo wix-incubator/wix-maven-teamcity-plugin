@@ -204,16 +204,34 @@ public class Matchers {
     
     public static Matcher<MBuildType> IsMBuildType(final String name, final String projectName, final String buildTypeId, final String projectId) {
         return new TypeSafeMatcher<MBuildType>() {
+            private Matcher<BuildTypeId> buildTypeIdMatcher = IsBuildTypeId(name, projectName, buildTypeId, projectId);
+
             @Override
             public boolean matchesSafely(MBuildType item) {
-                return item.getBuildTypeId().getBuildTypeId().equals(buildTypeId) &&
-                        item.getBuildTypeId().getName().equals(name) &&
-                        item.getBuildTypeId().getProjectId().equals(projectId) &&
-                        item.getBuildTypeId().getProjectName().equals(projectName);
+                return buildTypeIdMatcher.matches(item.getBuildTypeId());
             }
 
             public void describeTo(Description description) {
                 description.appendText("MBuildType(")
+                        .appendDescriptionOf(buildTypeIdMatcher)
+                        .appendText(")")
+                ;
+            }
+        };
+    }
+
+    public static Matcher<BuildTypeId> IsBuildTypeId(final String name, final String projectName, final String buildTypeId, final String projectId) {
+        return new TypeSafeMatcher<BuildTypeId>() {
+            @Override
+            public boolean matchesSafely(BuildTypeId item) {
+                return item.getBuildTypeId().equals(buildTypeId) &&
+                        item.getName().equals(name) &&
+                        item.getProjectId().equals(projectId) &&
+                        item.getProjectName().equals(projectName);
+            }
+
+            public void describeTo(Description description) {
+                description.appendText("IsBuildTypeId(")
                         .appendText(projectName)
                         .appendText(":")
                         .appendText(name)

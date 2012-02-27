@@ -35,9 +35,11 @@ public class BuildTypeDependenciesSorter {
             if (mArtifact instanceof MBuildTypeDependency) {
                 MBuildTypeDependency buildTypeDependency = (MBuildTypeDependency)mArtifact;
                 BuildTypeId buildTypeId = buildTypeDependency.getBuildTypeId();
-                getGraphDependecy(buildTypeId);
-                if (!stack.peek().equals(buildTypeId))
-                    getGraphDependecy(stack.peek()).add(buildTypeId);
+                if (!("test".equals(buildTypeDependency.getScope()) || "provided".equals(buildTypeDependency.getScope()))) {
+                    addToGraph(buildTypeId);
+                    if (!stack.peek().equals(buildTypeId))
+                        getGraphDependecy(stack.peek()).add(buildTypeId);
+                }
                 stack.push(buildTypeId);
             }
             return true;
@@ -48,6 +50,10 @@ public class BuildTypeDependenciesSorter {
                 stack.pop();
             }
             return true;
+        }
+
+        private void addToGraph(BuildTypeId buildTypeId) {
+            getGraphDependecy(buildTypeId);
         }
 
         private Set<BuildTypeId> getGraphDependecy(BuildTypeId buildTypeId) {
