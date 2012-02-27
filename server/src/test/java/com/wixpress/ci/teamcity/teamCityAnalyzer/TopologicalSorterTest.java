@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.wixpress.ci.teamcity.domain.BuildTypeId;
 import org.junit.Test;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,30 +26,64 @@ public class TopologicalSorterTest {
     
     @Test
     public void dependsOnProperlyOrdered() {
-        Map<BuildTypeId, Set<BuildTypeId>> graph = Maps.newHashMap();
-        graph.put(buildTypeId1, ImmutableSet.of(buildTypeId2));
-        graph.put(buildTypeId2, ImmutableSet.of(buildTypeId3));
-        graph.put(buildTypeId3, ImmutableSet.of(buildTypeId4));
-        graph.put(buildTypeId4, ImmutableSet.<BuildTypeId>of());
+        TestNode n4 = new TestNode(buildTypeId4);
+        TestNode n3 = new TestNode(buildTypeId3, n4);
+        TestNode n2 = new TestNode(buildTypeId2, n3);
+        TestNode n1 = new TestNode(buildTypeId1, n2);
+        
+        List<TestNode> sorted = new TopologicalSorter<TestNode>(ImmutableList.of(n1, n2, n3, n4)).sort();
 
-        List<BuildTypeId> sorted = new TopologicalSorter(graph).sort();
-
-        assertTrue(sorted.indexOf(buildTypeId1) < sorted.indexOf(buildTypeId2));
-        assertTrue(sorted.indexOf(buildTypeId2) < sorted.indexOf(buildTypeId3));
-        assertTrue(sorted.indexOf(buildTypeId3) < sorted.indexOf(buildTypeId4));
+        assertTrue(sorted.indexOf(n1) < sorted.indexOf(n2));
+        assertTrue(sorted.indexOf(n2) < sorted.indexOf(n3));
+        assertTrue(sorted.indexOf(n3) < sorted.indexOf(n4));
     }
     
     @Test
     public void missingDependency() {
-        Map<BuildTypeId, Set<BuildTypeId>> graph = Maps.newHashMap();
-        graph.put(buildTypeId1, ImmutableSet.of(buildTypeId2));
-        graph.put(buildTypeId2, ImmutableSet.of(buildTypeId3));
-        graph.put(buildTypeId3, ImmutableSet.of(buildTypeId4));
+        TestNode n4 = new TestNode(buildTypeId4);
+        TestNode n3 = new TestNode(buildTypeId3, n4);
+        TestNode n2 = new TestNode(buildTypeId2, n3);
+        TestNode n1 = new TestNode(buildTypeId1, n2);
 
-        List<BuildTypeId> sorted = new TopologicalSorter(graph).sort();
+        List<TestNode> sorted = new TopologicalSorter<TestNode>(ImmutableList.of(n1, n2, n3)).sort();
 
-        assertTrue(sorted.indexOf(buildTypeId1) < sorted.indexOf(buildTypeId2));
-        assertTrue(sorted.indexOf(buildTypeId2) < sorted.indexOf(buildTypeId3));
-        assertTrue(sorted.indexOf(buildTypeId4) == -1);
+        assertTrue(sorted.indexOf(n1) < sorted.indexOf(n2));
+        assertTrue(sorted.indexOf(n2) < sorted.indexOf(n3));
+        assertTrue(sorted.indexOf(n4) == -1);
+    }
+    
+    private class TestNode implements TopologicalSorter.Node<TestNode> {
+        BuildTypeId buildTypeId;
+        Iterable<TestNode> children;
+
+        private TestNode(BuildTypeId buildTypeId, TestNode ... children) {
+            this.buildTypeId = buildTypeId;
+            this.children = ImmutableList.copyOf(children);
+        }
+
+        public Iterable<TestNode> getChildren() {
+            return children;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            TestNode testNode = (TestNode) o;
+
+            if (buildTypeId != null ? !buildTypeId.equals(testNode.buildTypeId) : testNode.buildTypeId != null)
+                return false;
+            if (children != null ? !children.equals(testNode.children) : testNode.children != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = buildTypeId != null ? buildTypeId.hashCode() : 0;
+            result = 31 * result + (children != null ? children.hashCode() : 0);
+            return result;
+        }
     }
 }

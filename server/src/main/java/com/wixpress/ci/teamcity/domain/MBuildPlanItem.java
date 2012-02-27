@@ -13,12 +13,6 @@ public class MBuildPlanItem {
     private BuildTypeId buildTypeId = new BuildTypeId();
     private boolean needsBuild;
     private String description;
-    @JsonIgnore
-    private Date latestBuildStart;
-    @JsonIgnore
-    private boolean hasPendingChanges;
-    @JsonIgnore
-    private boolean unknown;
 
     public MBuildPlanItem() {
     }
@@ -27,21 +21,6 @@ public class MBuildPlanItem {
         this.buildTypeId = buildTypeId;
     }
     
-    public MBuildPlanItem withLastBuildStart(Date lastBuildStart) {
-        this.latestBuildStart = lastBuildStart;
-        return this;
-    }
-
-    public MBuildPlanItem withPendingChanges(boolean hasPendingChanges) {
-        this.hasPendingChanges = hasPendingChanges;
-        return this;
-    }
-
-    public MBuildPlanItem unknown() {
-        this.unknown = true;
-        return this;
-    }
-
     public MBuildPlanItem needsBuild(String description) {
         this.needsBuild = true;
         this.description = description;
@@ -65,30 +44,6 @@ public class MBuildPlanItem {
 
     public void setBuildTypeId(BuildTypeId buildTypeId) {
         this.buildTypeId = buildTypeId;
-    }
-
-    public Date getLatestBuildStart() {
-        return latestBuildStart;
-    }
-
-    public void setLatestBuildStart(Date latestBuildStart) {
-        this.latestBuildStart = latestBuildStart;
-    }
-
-    public boolean isHasPendingChanges() {
-        return hasPendingChanges;
-    }
-
-    public void setHasPendingChanges(boolean hasPendingChanges) {
-        this.hasPendingChanges = hasPendingChanges;
-    }
-
-    public boolean isUnknown() {
-        return unknown;
-    }
-
-    public void setUnknown(boolean unknown) {
-        this.unknown = unknown;
     }
 
     public boolean isNeedsBuild() {

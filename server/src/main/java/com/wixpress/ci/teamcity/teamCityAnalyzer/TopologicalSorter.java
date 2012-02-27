@@ -1,11 +1,9 @@
 package com.wixpress.ci.teamcity.teamCityAnalyzer;
 
-import com.google.common.collect.ImmutableList;
-import com.wixpress.ci.teamcity.domain.BuildTypeId;
-
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
@@ -14,42 +12,41 @@ import static com.google.common.collect.Maps.newHashMap;
  * @author yoav
  * @since 2/26/12
  */
-public class TopologicalSorter {
-    private BuildTypeId vertices[]; // list of vertices
+public class TopologicalSorter<NodeClass extends TopologicalSorter.Node<NodeClass>> {
+    private Node vertices[]; // list of vertices
 
     private int edges[][]; // adjacency edges
 
     private int numVerts; // current number of vertices
 
-    private BuildTypeId[] sortedArray;
+    private Node[] sortedArray;
 
     public TopologicalSorter(int size) {
-        vertices = new BuildTypeId[size];
+        vertices = new Node[size];
         edges = new int[size][size];
-        sortedArray = new BuildTypeId[size]; // sorted vert labels
+        sortedArray = new Node[size]; // sorted vert labels
     }
 
-    public TopologicalSorter(Map<BuildTypeId, Set<BuildTypeId>> nodes) {
+    public TopologicalSorter(Collection<NodeClass> nodes) {
         this(nodes.size());
 
-        Map<BuildTypeId, Integer> indexes = newHashMap();
+        Map<NodeClass, Integer> indexes = newHashMap();
 
         // add vertices
-        for (BuildTypeId buildTypeId : nodes.keySet()) {
-            indexes.put(buildTypeId, addVertex(buildTypeId));
+        for (NodeClass node : nodes) {
+            indexes.put(node, addVertex(node));
         }
 
         // add edges
-        for (Map.Entry<BuildTypeId, Set<BuildTypeId>> nodeEntry: nodes.entrySet()) {
-            BuildTypeId node = nodeEntry.getKey();
-            for (BuildTypeId nodeOutgoingEdges: nodeEntry.getValue()) {
+        for (NodeClass node: nodes) {
+            for (NodeClass nodeOutgoingEdges: node.getChildren()) {
                 if (indexes.containsKey(nodeOutgoingEdges))
                     addEdge(indexes.get(node), indexes.get(nodeOutgoingEdges));
             }
         }
     }
 
-    public int addVertex(BuildTypeId buildTypeId) {
+    public int addVertex(NodeClass buildTypeId) {
         vertices[numVerts] = buildTypeId;
         return numVerts++;
     }
@@ -58,7 +55,7 @@ public class TopologicalSorter {
         edges[start][end] = 1;
     }
 
-    public List<BuildTypeId> sort() // toplogical sort
+    public List<NodeClass> sort() // toplogical sort
     {
         while (numVerts > 0) // while vertices remain,
         {
@@ -74,7 +71,11 @@ public class TopologicalSorter {
             deleteVertex(currentVertex); // delete vertex
         }
 
-        return newArrayList(sortedArray);
+        ArrayList<NodeClass> result = newArrayList();
+        for (Node node: sortedArray)
+            //noinspection unchecked
+            result.add((NodeClass) node);
+        return result;
     }
 
     public int noSuccessors() // returns vert with no successors (or -1 if no such verts)
@@ -119,5 +120,11 @@ public class TopologicalSorter {
             edges[row][col] = edges[row][col + 1];
     }
 
+    public interface Node<NodeClass extends Node> {
+        public int hashCode();
+        public boolean equals(Object other);
+
+        Iterable<NodeClass> getChildren();
+    }
 
 }

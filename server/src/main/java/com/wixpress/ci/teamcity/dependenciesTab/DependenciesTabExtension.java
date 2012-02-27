@@ -1,8 +1,6 @@
 package com.wixpress.ci.teamcity.dependenciesTab;
 
-import com.wixpress.ci.teamcity.DependenciesAnalyzer;
 import com.wixpress.ci.teamcity.domain.BuildDependenciesResult;
-import com.wixpress.ci.teamcity.domain.DependenciesResult;
 import com.wixpress.ci.teamcity.domain.LogMessage;
 import com.wixpress.ci.teamcity.domain.LogMessageType;
 import com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypesDependencyAnalyzer;

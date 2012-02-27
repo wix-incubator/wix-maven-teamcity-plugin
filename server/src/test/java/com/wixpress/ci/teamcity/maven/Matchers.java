@@ -208,10 +208,10 @@ public class Matchers {
             public boolean matchesSafely(MBuildPlanItem item) {
                 return buildTypeIdMatcher.matches(item.getBuildTypeId()) &&
                         item.isNeedsBuild() == needsBuild &&
-                        descriptionMatches(item);
+                        discriptionMatches(item);
             }
 
-            private boolean descriptionMatches(MBuildPlanItem item) {
+            private boolean discriptionMatches(MBuildPlanItem item) {
                 return !needsBuild || (descriptionMatcher.matches(item.getDescription()));
             }
 
