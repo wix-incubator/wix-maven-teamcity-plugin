@@ -24,6 +24,7 @@ In the module dependencies section we see the modules of our build configuration
 The dependencies are captured match like maven dependencies:tree command, except that test and provided scope artifacts are only displayed for first level dependencies (direct module dependencies).
 
 We show labels on the dependencies for 
+
 +  "module" - dependency on another module in the same build configuration
 +  "<project name>:<build name>" - dependency on an artifact from another build configuration
 +  "test" - test scope dependency
