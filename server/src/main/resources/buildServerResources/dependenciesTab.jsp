@@ -309,7 +309,7 @@
                     method: 'get',
                     parameters: {action:"forceAnalyzeDependencies", id:buildTypeId},
                     onSuccess: function(transport){
-                        this.showTitles(false, false, true);
+                        DA.showTitles(false, false, true);
                         jQuery("#dep-build-dependencies").empty();
                         jQuery("#dep-module-dependencies").empty();
                         jQuery("#dep-message").empty();
