@@ -10,6 +10,7 @@ import com.wixpress.ci.teamcity.maven.workspace.fs.BuildTypeWorkspaceFilesystem;
 import jetbrains.buildServer.serverSide.SBuildType;
 import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.joda.time.DateTime;
+import org.sonatype.aether.repository.RemoteRepository;
 
 import java.util.List;
 
@@ -35,6 +36,7 @@ class CollectDependenciesRunner implements Runnable {
     public void run() {
         try {
             listenerLogger.info(String.format("Starting collection of dependencies for %s:%s", buildType.getProjectName(), buildType.getName()));
+            logRemoteRepositories(mavenBuildAnalyzer.getMavenBooter().remoteRepositories());
             BuildTypeWorkspaceFilesystem workspaceFilesystem = new BuildTypeWorkspaceFilesystem(MavenBuildTypeDependenciesAnalyzer.getTempDir(), buildType);
             try {
                 MavenWorkspaceReader workspaceReader =  mavenBuildAnalyzer.getMavenBooter().newWorkspaceReader(workspaceFilesystem, new LoggingMavenWorkspaceListener(listenerLogger));
@@ -61,6 +63,11 @@ class CollectDependenciesRunner implements Runnable {
                 // ignore this error
             }
         }
+    }
+
+    private void logRemoteRepositories(List<RemoteRepository> remoteRepositories) {
+        for (RemoteRepository remoteRep: remoteRepositories)
+            listenerLogger.info(String.format("Using remote repository: %s", remoteRep));
     }
 
     public boolean isCompleted() {
