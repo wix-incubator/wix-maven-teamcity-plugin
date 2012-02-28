@@ -26,6 +26,13 @@ The dependencies are captured match like maven dependencies:tree command, except
 We show labels on the dependencies for 
 
 +  "module" - dependency on another module in the same build configuration
-+  "<project name>:<build name>" - dependency on an artifact from another build configuration
++  "project name:build name" - dependency on an artifact from another build configuration
 +  "test" - test scope dependency
 +  "provided" - provided scope dependency
+
+
+Configuration and Assumptions
+------------
+
+1. The Plugin reads the maven configuration of the box TeamCity is installed on. Just ensure you have the settings.xml file configured just the same as for the build agents. No other configuration is required.
+2. The Plugin assumes that a project has a pom.xml file in the build configuration VCS root. 
