@@ -27,7 +27,10 @@ import org.sonatype.aether.collection.DependencySelector;
 import org.sonatype.aether.connector.file.FileRepositoryConnectorFactory;
 import org.sonatype.aether.connector.wagon.WagonProvider;
 import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
+import org.sonatype.aether.impl.UpdateCheckManager;
 import org.sonatype.aether.impl.VersionResolver;
+import org.sonatype.aether.impl.internal.DefaultUpdateCheckManager;
+import org.sonatype.aether.impl.internal.FixedUpdateCheckManager;
 import org.sonatype.aether.repository.*;
 import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
 import org.sonatype.aether.transfer.TransferListener;
@@ -130,6 +133,7 @@ public class MavenBooter {
                 locator.addService( RepositoryConnectorFactory.class, WagonRepositoryConnectorFactory.class );
                 locator.setService( VersionResolver.class, FixedDefaultVersionResolver.class);
                 locator.setServices( WagonProvider.class, new ManualWagonProvider() );
+                locator.setService(UpdateCheckManager.class, FixedUpdateCheckManager.class);
 
                 return locator.getService( RepositorySystem.class );
             }
