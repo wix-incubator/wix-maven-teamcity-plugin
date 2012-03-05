@@ -19,14 +19,12 @@ import static com.google.common.collect.Lists.newArrayList;
 public class CollectingMessagesListenerLogger implements ListenerLogger {
 
     private final List<LogMessage> messages = newArrayList();
-    private DateTime lastMessageTime = new DateTime();
     private String buildTypeId = "";
 
     public void info(String message) {
         synchronized (messages) {
             Loggers.SERVER.info(String.format("%s: %s", buildTypeId, message));
             messages.add(new LogMessage(message, LogMessageType.info));
-            lastMessageTime = new DateTime();
         }
     }
 
@@ -34,7 +32,6 @@ public class CollectingMessagesListenerLogger implements ListenerLogger {
         synchronized (messages) {
             Loggers.SERVER.info(String.format("%s: %s", buildTypeId, message));
             messages.add(new LogMessage(message, LogMessageType.progress));
-            lastMessageTime = new DateTime();
         }
     }
 
@@ -42,7 +39,6 @@ public class CollectingMessagesListenerLogger implements ListenerLogger {
         synchronized (messages) {
             Loggers.SERVER.error(String.format("%s: %s", buildTypeId, message));
             messages.add(new LogMessage(message, LogMessageType.error));
-            lastMessageTime = new DateTime();
         }
     }
 
@@ -50,7 +46,6 @@ public class CollectingMessagesListenerLogger implements ListenerLogger {
         synchronized (messages) {
             Loggers.SERVER.error(String.format("%s: %s", buildTypeId, message), e);
             messages.add(new LogMessage(message, LogMessageType.error, e));
-            lastMessageTime = new DateTime();
         }
     }
 
@@ -74,7 +69,6 @@ public class CollectingMessagesListenerLogger implements ListenerLogger {
             String message = String.format("completed collecting dependencies for %s:%s", buildType.getProject().getName(), buildType.getName());
             System.out.println(message);
             messages.add(new LogMessage(message, LogMessageType.info));
-            lastMessageTime = new DateTime();
         }
     }
 
@@ -84,7 +78,6 @@ public class CollectingMessagesListenerLogger implements ListenerLogger {
             System.out.println(message);
             e.printStackTrace();
             messages.add(new LogMessage(message, LogMessageType.error, e));
-            lastMessageTime = new DateTime();
         }
     }
 
