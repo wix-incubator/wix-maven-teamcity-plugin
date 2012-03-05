@@ -128,10 +128,6 @@ public class BuildPlanAnalyzer {
             return true;
         }
 
-        private void addToGraph(BuildTypeId buildTypeId) {
-            getGraphDependecy(buildTypeId);
-        }
-
         private BuildTypeNode getGraphDependecy(BuildTypeId buildTypeId) {
             if (graph.containsKey(buildTypeId))
                 return graph.get(buildTypeId);

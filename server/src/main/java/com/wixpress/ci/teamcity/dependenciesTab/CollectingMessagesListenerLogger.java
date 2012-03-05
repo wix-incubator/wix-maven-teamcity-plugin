@@ -3,6 +3,7 @@ package com.wixpress.ci.teamcity.dependenciesTab;
 import com.wixpress.ci.teamcity.domain.LogMessage;
 import com.wixpress.ci.teamcity.domain.LogMessageType;
 import com.wixpress.ci.teamcity.maven.listeners.ListenerLogger;
+import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.serverSide.SBuildType;
 import org.joda.time.DateTime;
 
@@ -19,10 +20,11 @@ public class CollectingMessagesListenerLogger implements ListenerLogger {
 
     private final List<LogMessage> messages = newArrayList();
     private DateTime lastMessageTime = new DateTime();
+    private String buildTypeId = "";
 
     public void info(String message) {
         synchronized (messages) {
-            System.out.println(message);
+            Loggers.SERVER.info(String.format("%s: %s", buildTypeId, message));
             messages.add(new LogMessage(message, LogMessageType.info));
             lastMessageTime = new DateTime();
         }
@@ -30,7 +32,7 @@ public class CollectingMessagesListenerLogger implements ListenerLogger {
 
     public void progress(String message) {
         synchronized (messages) {
-            System.out.println(message);
+            Loggers.SERVER.info(String.format("%s: %s", buildTypeId, message));
             messages.add(new LogMessage(message, LogMessageType.progress));
             lastMessageTime = new DateTime();
         }
@@ -38,7 +40,7 @@ public class CollectingMessagesListenerLogger implements ListenerLogger {
 
     public void error(String message) {
         synchronized (messages) {
-            System.out.println(message);
+            Loggers.SERVER.error(String.format("%s: %s", buildTypeId, message));
             messages.add(new LogMessage(message, LogMessageType.error));
             lastMessageTime = new DateTime();
         }
@@ -46,8 +48,7 @@ public class CollectingMessagesListenerLogger implements ListenerLogger {
 
     public void error(String message, Exception e) {
         synchronized (messages) {
-            System.out.println(message);
-            e.printStackTrace();
+            Loggers.SERVER.error(String.format("%s: %s", buildTypeId, message), e);
             messages.add(new LogMessage(message, LogMessageType.error, e));
             lastMessageTime = new DateTime();
         }
@@ -87,4 +88,7 @@ public class CollectingMessagesListenerLogger implements ListenerLogger {
         }
     }
 
+    public void setBuildTypeId(String buildTypeId) {
+        this.buildTypeId = buildTypeId;
+    }
 }

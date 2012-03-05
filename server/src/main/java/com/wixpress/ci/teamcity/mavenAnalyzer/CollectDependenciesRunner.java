@@ -31,6 +31,7 @@ class CollectDependenciesRunner implements Runnable {
     public CollectDependenciesRunner(MavenBuildTypeDependenciesAnalyzer mavenBuildAnalyzer, SBuildType buildType) {
         this.mavenBuildAnalyzer = mavenBuildAnalyzer;
         this.buildType = buildType;
+        listenerLogger.setBuildTypeId(buildType.getBuildTypeId());
     }
 
     public void run() {
