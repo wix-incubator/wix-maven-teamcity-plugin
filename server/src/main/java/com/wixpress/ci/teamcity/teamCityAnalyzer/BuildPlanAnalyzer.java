@@ -2,16 +2,16 @@ package com.wixpress.ci.teamcity.teamCityAnalyzer;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabConfigModel;
 import com.wixpress.ci.teamcity.domain.*;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SFinishedBuild;
+import jetbrains.buildServer.vcs.SVcsModification;
 
 import java.util.*;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newLinkedList;
-import static com.google.common.collect.Lists.transform;
+import static com.google.common.collect.Lists.*;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 
@@ -22,9 +22,13 @@ import static com.google.common.collect.Sets.newHashSet;
 public class BuildPlanAnalyzer {
     
     private ProjectManager projectManager;
+    private DependenciesTabConfigModel configModel;
     
-    public BuildPlanAnalyzer(ProjectManager projectManager) {
+    private SimplePatternMatcher patternMatcher = new SimplePatternMatcher();
+    
+    public BuildPlanAnalyzer(ProjectManager projectManager, DependenciesTabConfigModel configModel) {
         this.projectManager = projectManager;
+        this.configModel = configModel;
     }
 
     public List<MBuildPlanItem> sortBuildTypes(MModule module, BuildTypeId root) {
@@ -63,12 +67,28 @@ public class BuildPlanAnalyzer {
         for (BuildTypeNode buildTypeNode: graph.values()) {
             SBuildType buildType = projectManager.findBuildTypeById(buildTypeNode.buildTypeId.getBuildTypeId());
             if (buildType != null) {
-                buildTypeNode.hasPendingChanges = buildType.getPendingChanges().size() > 0;
+                buildTypeNode.hasPendingChanges = checkPendingChanges(buildType);
                 buildTypeNode.setLastSuccessfulBuild(buildType.getLastChangesSuccessfullyFinished());
             }
             else
                 buildTypeNode.unknownBuildType = true;
         }
+    }
+
+    private boolean checkPendingChanges(SBuildType buildType) {
+        for (SVcsModification sVcsModification: buildType.getPendingChanges()) {
+            if (!isIgnoredChange(sVcsModification.getDescription()))
+                return true;
+        }
+        return false;
+    }
+
+    private boolean isIgnoredChange(String description) {
+        for (String commitToIgnore : configModel.getConfig().getCommitsToIgnore()) {
+            if (patternMatcher.wildcardMatch(description, commitToIgnore))
+                return true;
+        }
+        return false;
     }
 
     private Map<BuildTypeId, BuildTypeNode> buildGraph(MModule module, BuildTypeId root) {

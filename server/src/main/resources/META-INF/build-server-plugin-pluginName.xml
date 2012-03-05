@@ -5,6 +5,7 @@
     <!-- the GUI -->
     <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabAjaxController" init-method="register"/>
     <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabExtension"></bean>
+    <bean id="configModel" class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabConfigModel"></bean>
     <bean class="com.wixpress.ci.teamcity.dependenciesTab.TeamCityEventsListener"/>
     <!-- the analyzers -->
     <bean id="objectMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
@@ -21,6 +22,7 @@
     <bean class="com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypeDependenciesDecorator"/>
     <bean class="com.wixpress.ci.teamcity.teamCityAnalyzer.BuildPlanAnalyzer">
         <constructor-arg ref="buildServer"/>
+        <constructor-arg ref="configModel"/>
     </bean>
     <bean class="com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypesDependencyAnalyzer">
         <constructor-arg ref="mavenDependenciesAnalyzer"/>

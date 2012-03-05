@@ -1,15 +1,14 @@
 package com.wixpress.ci.teamcity.teamCityAnalyzer;
 
 import com.google.common.collect.ImmutableList;
-import com.wixpress.ci.teamcity.domain.BuildTypeId;
-import com.wixpress.ci.teamcity.domain.MBuildPlanItem;
-import com.wixpress.ci.teamcity.domain.MBuildTypeDependency;
-import com.wixpress.ci.teamcity.domain.MModule;
+import com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabConfigModel;
+import com.wixpress.ci.teamcity.domain.*;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SFinishedBuild;
 import jetbrains.buildServer.vcs.SVcsModification;
 import org.hamcrest.Matcher;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Date;
@@ -30,13 +29,19 @@ import static org.mockito.Mockito.when;
 public class BuildPlanAnalyzerTest {
 
     private ProjectManager projectManager = mock(ProjectManager.class);
-
-    BuildPlanAnalyzer sorter = new BuildPlanAnalyzer(projectManager);
+    private DependenciesTabConfigModel configModel = mock(DependenciesTabConfigModel.class);
+    private DependenciesTabConfig config = mock(DependenciesTabConfig.class);
+    
+    BuildPlanAnalyzer sorter = new BuildPlanAnalyzer(projectManager, configModel);
     Date d1 = new Date(2011, 1, 1, 1, 1);
     Date d2 = new Date(2011, 1, 1, 1, 2);
     Date d3 = new Date(2011, 1, 1, 1, 3);
     Date d4 = new Date(2011, 1, 1, 1, 4);
 
+    @Before
+    public void initMocks() {
+        when(configModel.getConfig()).thenReturn(config);
+    }
     
     @Test
     public void testSortBuildTypes() {
@@ -149,6 +154,29 @@ public class BuildPlanAnalyzerTest {
     }
 
     @Test
+    public void dependentBuildHasIgnoredPendingChanges() {
+        when(config.getCommitsToIgnore()).thenReturn(ImmutableList.of("pending*"));
+        MModule module = MModule("com.wixpress", "C3", "3")
+                .withDependency(dependency("a", "bt1",
+                        dependency("b", "bt1",
+                                dependency("c", "bt2"),
+                                dependency("d", "bt3")),
+                        dependency("d", "bt3")))
+                .build();
+        mockBuild("root", false, d3);
+        mockBuild("bt1", false, d2);
+        mockBuild("bt2", true, d1);
+        mockBuild("bt3", false, d1);
+
+        List<MBuildPlanItem> sorted = sorter.sortBuildTypes(module, buildTypeId("root"));
+
+        assertThat(sorted, hasItem(IsMBuildPlanItem(is(buildTypeId("root")), false, any(String.class))));
+        assertThat(sorted, hasItem(IsMBuildPlanItem(is(buildTypeId("bt1")), false, any(String.class))));
+        assertThat(sorted, hasItem(IsMBuildPlanItem(is(buildTypeId("bt2")), false, any(String.class))));
+        assertThat(sorted, hasItem(IsMBuildPlanItem(is(buildTypeId("bt3")), false, any(String.class))));
+    }
+
+    @Test
     public void dependentBuildIsNewer() {
         MModule module = MModule("com.wixpress", "C3", "3")
                 .withDependency(dependency("a", "bt1",
@@ -174,6 +202,7 @@ public class BuildPlanAnalyzerTest {
     private void mockBuild(String buildTypeId, boolean hasPendingChanges, Date lastSuccessFullBuild) {
         SBuildType buildType = mock(SBuildType.class);
         SVcsModification vcsModification = mock(SVcsModification.class);
+        when(vcsModification.getDescription()).thenReturn("pending change");
         SFinishedBuild finishedBuild = mock(SFinishedBuild.class);
         when(projectManager.findBuildTypeById(buildTypeId)).thenReturn(buildType);
         when(buildType.getPendingChanges()).thenReturn(hasPendingChanges? ImmutableList.of(vcsModification):ImmutableList.<SVcsModification>of());
