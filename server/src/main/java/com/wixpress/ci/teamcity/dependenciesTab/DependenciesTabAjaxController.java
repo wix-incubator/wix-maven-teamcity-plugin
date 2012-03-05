@@ -1,6 +1,8 @@
 package com.wixpress.ci.teamcity.dependenciesTab;
 
+import com.google.common.collect.Lists;
 import com.wixpress.ci.teamcity.DependenciesAnalyzer;
+import com.wixpress.ci.teamcity.domain.DependenciesTabConfig;
 import com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypesDependencyAnalyzer;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.serverSide.ProjectManager;
@@ -13,7 +15,9 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,20 +30,24 @@ public class DependenciesTabAjaxController extends BaseController {
     private final ProjectManager projectManager;
     private final ObjectMapper objectMapper;
     private final Map<String, Action> actions = new HashMap<String, Action>();
+    private final ConfigModel configModel;
 
     public DependenciesTabAjaxController(SBuildServer server, WebControllerManager myManager,
                                          final ProjectManager projectManager,
                                          final BuildTypesDependencyAnalyzer buildTypesAnalyzer,
-                                         final ObjectMapper objectMapper) {
+                                         final ObjectMapper objectMapper,
+                                         ConfigModel configModel) {
         super(server);
         this.myManager = myManager;
         this.dependenciesAnalyzer = buildTypesAnalyzer;
         this.objectMapper = objectMapper;
         this.projectManager = projectManager;
+        this.configModel = configModel;
 
         registerProgressOperation();
         registerForceAnalyzeDependencies();
         registerGetBuildDependencies();
+        registerSaveConfig();
     }
 
     @Override
@@ -55,6 +63,20 @@ public class DependenciesTabAjaxController extends BaseController {
 
     public void register() {
         myManager.registerController("/maven-dependencies-plugin.html", this);
+    }
+
+    private void registerSaveConfig() {
+        actions.put("saveConfig", new Action() {
+            @Override
+            Object doHandle(HttpServletRequest request) throws Exception {
+                String commitsToIgnore = request.getParameter("commitsToIgnore");
+                List<String> commitsToIgnoreList = Lists.newArrayList(commitsToIgnore.split("\n"));
+                DependenciesTabConfig config = new DependenciesTabConfig();
+                config.setCommitsToIgnore(commitsToIgnoreList);
+                configModel.updateConfig(config);
+                return null;
+            }
+        });
     }
 
     private void registerGetBuildDependencies() {
@@ -102,8 +124,10 @@ public class DependenciesTabAjaxController extends BaseController {
         public ModelAndView handle(HttpServletRequest request, HttpServletResponse response) {
             try {
                 Object result = doHandle(request);
-                response.setHeader("content-type", "application/json");
-                objectMapper.writeValue(response.getOutputStream(), result);
+                if (result != null) {
+                    response.setHeader("content-type", "application/json");
+                    objectMapper.writeValue(response.getOutputStream(), result);
+                }
                 return newEmptyModelAndView();
             } catch (BadRequestException e) {
                 return writeError(response, 400, e);

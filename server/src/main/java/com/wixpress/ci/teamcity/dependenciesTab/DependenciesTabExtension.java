@@ -28,7 +28,7 @@ public class DependenciesTabExtension extends BuildTypeTab {
     private final ObjectMapper objectMapper;
 
     public DependenciesTabExtension(WebControllerManager manager, ProjectManager projectManager, BuildTypesDependencyAnalyzer buildTypesAnalyzer, ObjectMapper objectMapper) {
-        super("wix-maven-3-teamcity-plugin", "Maven 3 Dependencies", manager, projectManager, "dependenciesTab.jsp");
+        super("wix-maven-3-teamcity-plugin", "Maven Dependencies", manager, projectManager, "dependenciesTab.jsp");
         this.dependenciesAnalyzer = buildTypesAnalyzer;
         this.objectMapper = objectMapper;
     }

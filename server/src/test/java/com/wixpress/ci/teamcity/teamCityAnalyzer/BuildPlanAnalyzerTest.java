@@ -1,7 +1,7 @@
 package com.wixpress.ci.teamcity.teamCityAnalyzer;
 
 import com.google.common.collect.ImmutableList;
-import com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabConfigModel;
+import com.wixpress.ci.teamcity.dependenciesTab.ConfigModel;
 import com.wixpress.ci.teamcity.domain.*;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 public class BuildPlanAnalyzerTest {
 
     private ProjectManager projectManager = mock(ProjectManager.class);
-    private DependenciesTabConfigModel configModel = mock(DependenciesTabConfigModel.class);
+    private ConfigModel configModel = mock(ConfigModel.class);
     private DependenciesTabConfig config = mock(DependenciesTabConfig.class);
     
     BuildPlanAnalyzer sorter = new BuildPlanAnalyzer(projectManager, configModel);

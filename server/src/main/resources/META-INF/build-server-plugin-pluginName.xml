@@ -5,7 +5,8 @@
     <!-- the GUI -->
     <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabAjaxController" init-method="register"/>
     <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabExtension"></bean>
-    <bean id="configModel" class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabConfigModel"></bean>
+    <bean id="configModel" class="com.wixpress.ci.teamcity.dependenciesTab.ConfigModel"></bean>
+    <bean class="com.wixpress.ci.teamcity.dependenciesTab.DependenciesAdminTabExtension"/>
     <bean class="com.wixpress.ci.teamcity.dependenciesTab.TeamCityEventsListener"/>
     <!-- the analyzers -->
     <bean id="objectMapper" class="org.codehaus.jackson.map.ObjectMapper"/>

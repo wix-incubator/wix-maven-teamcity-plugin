@@ -2,7 +2,7 @@ package com.wixpress.ci.teamcity.teamCityAnalyzer;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.wixpress.ci.teamcity.dependenciesTab.DependenciesTabConfigModel;
+import com.wixpress.ci.teamcity.dependenciesTab.ConfigModel;
 import com.wixpress.ci.teamcity.domain.*;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -22,11 +22,11 @@ import static com.google.common.collect.Sets.newHashSet;
 public class BuildPlanAnalyzer {
     
     private ProjectManager projectManager;
-    private DependenciesTabConfigModel configModel;
+    private ConfigModel configModel;
     
     private SimplePatternMatcher patternMatcher = new SimplePatternMatcher();
     
-    public BuildPlanAnalyzer(ProjectManager projectManager, DependenciesTabConfigModel configModel) {
+    public BuildPlanAnalyzer(ProjectManager projectManager, ConfigModel configModel) {
         this.projectManager = projectManager;
         this.configModel = configModel;
     }

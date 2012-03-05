@@ -16,7 +16,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author yoav
  * @since 3/5/12
  */
-public class DependenciesTabConfigModel {
+public class ConfigModel {
 
     public static final String CONFIG_FILE_NAME = "dependencies-config.json";
     
@@ -26,7 +26,7 @@ public class DependenciesTabConfigModel {
     private ObjectMapper objectMapper;
     private final File configFile;
     
-    public DependenciesTabConfigModel(ServerPaths serverPaths, ObjectMapper objectMapper) {
+    public ConfigModel(ServerPaths serverPaths, ObjectMapper objectMapper) {
         this.serverPaths = serverPaths;
         this.objectMapper = objectMapper;
         configFile = new File(serverPaths.getConfigDir(), CONFIG_FILE_NAME);
