@@ -20,20 +20,22 @@
         };
     })();
 </script>
-<div id="message-target"></div>
-<table class="runnerFormTable">
-    <tr class="groupingTitle">
-        <td colspan="2">Maven Dependencies - Version Control Settings</td>
-    </tr>
+<div class="serverConfigPage">
+    <div id="message-target"></div>
+    <table class="runnerFormTable">
+        <tr class="groupingTitle">
+            <td colspan="2">Maven Dependencies - Version Control Settings</td>
+        </tr>
 
-    <tr>
-        <th>Commits to Ignore:</th>
-        <td>
-            <textarea id="commitsToIgnore" rows="8" cols="100">${commitsToIgnore}</textarea>
-        </td>
-    </tr>
+        <tr>
+            <th>Commits to Ignore:</th>
+            <td>
+                <textarea id="commitsToIgnore" rows="8" cols="100">${commitsToIgnore}</textarea>
+            </td>
+        </tr>
 
-</table>
-<div class="saveButtonsBlock">
-    <input class="submitButton" type="button" value="Save" title="Click to save the maven plugin settings" onclick="DA.save();"/>
+    </table>
+    <div class="saveButtonsBlock">
+        <input class="submitButton" type="button" value="Save" title="Click to save the maven plugin settings" onclick="DA.save();"/>
+    </div>
 </div>
