@@ -31,6 +31,7 @@
             <th>Commits to Ignore:</th>
             <td>
                 <textarea id="commitsToIgnore" rows="8" cols="100">${commitsToIgnore}</textarea>
+                <div class="smallNote">Each line is a separate match expression, evaluated on the VCS commit messages. The expressions may contain one or more wildcards '*'.</div>
             </td>
         </tr>
 
