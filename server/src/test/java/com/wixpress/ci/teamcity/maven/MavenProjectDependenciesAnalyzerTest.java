@@ -13,6 +13,7 @@ import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.sonatype.aether.collection.DependencyCollectionException;
 import org.sonatype.aether.resolution.ArtifactDescriptorException;
@@ -112,6 +113,7 @@ public class MavenProjectDependenciesAnalyzerTest {
 
     }
 
+    @Ignore
     @Test
     public void test() throws MavenWorkspaceReaderException, ArtifactDescriptorException, IOException, DependencyCollectionException, ModelBuildingException {
         File repositoryRoot = new File("c:/work/wix/git/wix-public");

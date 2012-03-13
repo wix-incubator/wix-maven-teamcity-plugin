@@ -9,6 +9,7 @@ import jetbrains.buildServer.serverSide.SRunningBuild;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.vcs.VcsModification;
 import jetbrains.buildServer.vcs.VcsRoot;
+import jetbrains.buildServer.vcs.impl.DBVcsModification;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,8 +36,8 @@ public class TeamCityEventsListener {
         }
 
         public void changeAdded(@NotNull VcsModification modification, @NotNull VcsRoot root, @Nullable Collection<SBuildType> buildTypes) {
-            if (buildTypes != null)
-                for (SBuildType buildType: buildTypes)
+            if (modification != null)
+                for (SBuildType buildType: ((DBVcsModification) modification).getRelatedConfigurations())
                     dependenciesAnalyzer.analyzeDependencies(buildType);
         }
 
