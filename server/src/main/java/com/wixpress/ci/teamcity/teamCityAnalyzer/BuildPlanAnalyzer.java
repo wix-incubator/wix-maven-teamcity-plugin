@@ -105,8 +105,12 @@ public class BuildPlanAnalyzer {
 
             for (BuildTypeId dependentBuildType: pendingAdditionBuildTypeIds) {
                 SBuildType buildType = projectManager.findBuildTypeById(dependentBuildType.getBuildTypeId());
-                BuildTypeDependencies dependentDependencies = dependenciesDao.loadBuildDependencies(buildType);
-                graph.addBuildTypeDependencies(dependentDependencies);
+                if (buildType != null) {
+                    BuildTypeDependencies dependentDependencies = dependenciesDao.loadBuildDependencies(buildType);
+                    if (dependentDependencies != null)
+                        graph.addBuildTypeDependencies(dependentDependencies);
+                }
+                graph.markBuildTypeAsAdded(dependentBuildType);
             }
             pendingAdditionBuildTypeIds = graph.pendingAdditionBuildTypeIds();
         }
@@ -140,7 +144,10 @@ public class BuildPlanAnalyzer {
         public Set<BuildTypeId> pendingAdditionBuildTypeIds() {
             return new HashSet<BuildTypeId>(Sets.difference(keySet(), addedBuildTypes));
         }
-        
+
+        public void markBuildTypeAsAdded(BuildTypeId buildTypeId) {
+            addedBuildTypes.add(buildTypeId);
+        }
     }
     
     Joiner joiner = Joiner.on(", ");
