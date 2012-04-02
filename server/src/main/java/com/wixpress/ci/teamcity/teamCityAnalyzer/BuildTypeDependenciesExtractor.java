@@ -33,7 +33,8 @@ public class BuildTypeDependenciesExtractor {
                 MBuildTypeDependency buildTypeDependency = (MBuildTypeDependency)mArtifact;
                 BuildTypeId buildTypeId = buildTypeDependency.getBuildTypeId();
                 if (!("test".equals(buildTypeDependency.getScope()) || "provided".equals(buildTypeDependency.getScope()))) {
-                    dependencies.getDependencies().add(buildTypeId);
+                    if (!buildTypeId.equals(dependencies.getBuildTypeId()))
+                        dependencies.getDependencies().add(buildTypeId);
                     return true;
                 }
                 return false;
