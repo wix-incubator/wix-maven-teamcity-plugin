@@ -21,15 +21,18 @@
     <bean id="executor" class="com.wixpress.ci.teamcity.mavenAnalyzer.CollectDependenciesExecutor" destroy-method="shutdown"/>
     <bean id="mavenDependenciesAnalyzer" class="com.wixpress.ci.teamcity.mavenAnalyzer.MavenBuildTypeDependenciesAnalyzer"/>
     <bean id="buildTypeDependenciesDecorator" class="com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypeDependenciesDecorator"/>
-    <bean class="com.wixpress.ci.teamcity.teamCityAnalyzer.BuildPlanAnalyzer">
+    <bean id="buildTypeDependenciesExtractor" class="com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypeDependenciesExtractor"/>
+    <bean id="buildPlanAnalyzer" class="com.wixpress.ci.teamcity.teamCityAnalyzer.BuildPlanAnalyzer">
         <constructor-arg ref="buildServer"/>
         <constructor-arg ref="configModel"/>
-        <constructor-arg ref="mavenDependenciesAnalyzer"/>
-        <constructor-arg ref="buildTypeDependenciesDecorator"/>
+        <constructor-arg ref="dependenciesDao"/>
     </bean>
     <bean class="com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypesDependencyAnalyzer">
         <constructor-arg ref="mavenDependenciesAnalyzer"/>
         <constructor-arg ref="projectManager"/>
+        <constructor-arg ref="buildPlanAnalyzer"/>
+        <constructor-arg ref="buildTypeDependenciesExtractor"/>
+        <constructor-arg ref="dependenciesDao"/>
     </bean>
 
 </beans>
