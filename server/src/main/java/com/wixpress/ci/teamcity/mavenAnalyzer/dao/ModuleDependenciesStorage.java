@@ -13,22 +13,22 @@ import static com.google.common.collect.Maps.newHashMap;
 * @author yoav
 * @since 2/23/12
 */
-public class BuildTypeDependenciesStorage {
+public class ModuleDependenciesStorage {
     private MModule module;
     private Map<String, String> vcsRevisions = newHashMap();
     private List<LogMessage> messages = newArrayList();
     private boolean isException;
 
-    public BuildTypeDependenciesStorage() {
+    public ModuleDependenciesStorage() {
     }
 
-    public BuildTypeDependenciesStorage(MModule module, Map<String, String> vcsRevisions) {
+    public ModuleDependenciesStorage(MModule module, Map<String, String> vcsRevisions) {
         this.module = module;
         this.vcsRevisions = vcsRevisions;
         this.isException = false;
     }
 
-    public BuildTypeDependenciesStorage(List<LogMessage> messages) {
+    public ModuleDependenciesStorage(List<LogMessage> messages) {
         this.messages = messages;
         this.isException = true;
     }

@@ -2,8 +2,12 @@ package com.wixpress.ci.teamcity.teamCityAnalyzer;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.wixpress.ci.teamcity.dependenciesTab.ConfigModel;
 import com.wixpress.ci.teamcity.domain.*;
+import com.wixpress.ci.teamcity.mavenAnalyzer.dao.DependenciesDao;
+import com.wixpress.ci.teamcity.teamCityAnalyzer.entity.BuildTypeDependencies;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SFinishedBuild;
@@ -12,7 +16,6 @@ import jetbrains.buildServer.vcs.SVcsModification;
 import java.util.*;
 
 import static com.google.common.collect.Lists.*;
-import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 
 /**
@@ -23,16 +26,18 @@ public class BuildPlanAnalyzer {
     
     private ProjectManager projectManager;
     private ConfigModel configModel;
-    
+    private DependenciesDao dependenciesDao;
+
     private SimplePatternMatcher patternMatcher = new SimplePatternMatcher();
     
-    public BuildPlanAnalyzer(ProjectManager projectManager, ConfigModel configModel) {
+    public BuildPlanAnalyzer(ProjectManager projectManager, ConfigModel configModel, DependenciesDao dependenciesDao) {
         this.projectManager = projectManager;
         this.configModel = configModel;
+        this.dependenciesDao = dependenciesDao;
     }
 
-    public List<MBuildPlanItem> sortBuildTypes(MModule module, BuildTypeId root) {
-        Map<BuildTypeId, BuildTypeNode> graph = buildGraph(module, root);
+    public List<MBuildPlanItem> getBuildPlan(BuildTypeDependencies buildTypeDependencies) {
+        Graph graph = buildGraph(buildTypeDependencies);
         markNodesPendingChangesAndLastBuild(graph);
         markNodesNeedingRebuild(graph);
         markNodesNeedingRebuildingByDependencies(graph);        
@@ -48,13 +53,13 @@ public class BuildPlanAnalyzer {
         });
     }
 
-    private void markNodesNeedingRebuildingByDependencies(Map<BuildTypeId, BuildTypeNode> graph) {
+    private void markNodesNeedingRebuildingByDependencies(Graph graph) {
         for (BuildTypeNode buildTypeNode: graph.values()) {
             buildTypeNode.analyzeParentDependencies();
         }
     }
 
-    private void markNodesNeedingRebuild(Map<BuildTypeId, BuildTypeNode> graph) {
+    private void markNodesNeedingRebuild(Graph graph) {
         for (BuildTypeNode buildTypeNode: graph.values()) {
             if (buildTypeNode.latestBuildStart == null) 
                 buildTypeNode.markNeedsBuild("No successful build found");
@@ -63,7 +68,7 @@ public class BuildPlanAnalyzer {
         }
     }
 
-    private void markNodesPendingChangesAndLastBuild(Map<BuildTypeId, BuildTypeNode> graph) {
+    private void markNodesPendingChangesAndLastBuild(Graph graph) {
         for (BuildTypeNode buildTypeNode: graph.values()) {
             SBuildType buildType = projectManager.findBuildTypeById(buildTypeNode.buildTypeId.getBuildTypeId());
             if (buildType != null) {
@@ -91,54 +96,53 @@ public class BuildPlanAnalyzer {
         return false;
     }
 
-    private Map<BuildTypeId, BuildTypeNode> buildGraph(MModule module, BuildTypeId root) {
-        BuildTypeDependencyExtractor dependencyExtractor = new BuildTypeDependencyExtractor(root);
-        module.accept(dependencyExtractor);
-        return dependencyExtractor.graph;
+    private Graph buildGraph(BuildTypeDependencies buildTypeDependencies) {
+        Graph graph = new Graph();
+        graph.addBuildTypeDependencies(buildTypeDependencies);
+
+        Set<BuildTypeId> pendingAdditionBuildTypeIds = graph.pendingAdditionBuildTypeIds();
+        while (graph.pendingAdditionBuildTypeIds().size() > 0) {
+
+            for (BuildTypeId dependentBuildType: pendingAdditionBuildTypeIds) {
+                SBuildType buildType = projectManager.findBuildTypeById(dependentBuildType.getBuildTypeId());
+                BuildTypeDependencies dependentDependencies = dependenciesDao.loadBuildDependencies(buildType);
+                graph.addBuildTypeDependencies(dependentDependencies);
+            }
+            pendingAdditionBuildTypeIds = graph.pendingAdditionBuildTypeIds();
+        }
+
+        return graph;
     }
 
-    private class BuildTypeDependencyExtractor implements MArtifactVisitor {
-
-        Map<BuildTypeId, BuildTypeNode> graph = newHashMap();
-        Deque<BuildTypeId> stack = newLinkedList();
-
-        public BuildTypeDependencyExtractor(BuildTypeId root) {
-            stack.push(root);
-        }
-
-
-        public boolean visitEnter(MArtifact mArtifact) {
-            if (mArtifact instanceof MBuildTypeDependency) {
-                MBuildTypeDependency buildTypeDependency = (MBuildTypeDependency)mArtifact;
-                BuildTypeId buildTypeId = buildTypeDependency.getBuildTypeId();
-                if (!("test".equals(buildTypeDependency.getScope()) || "provided".equals(buildTypeDependency.getScope()))) {
-                    BuildTypeNode newNode = getGraphDependecy(buildTypeId);
-                    if (!stack.peek().equals(buildTypeId))
-                        getGraphDependecy(stack.peek()).addChild(newNode);
-                }
-                stack.push(buildTypeId);
-            }
-            return true;
-        }
-
-        public boolean visitLeave(MArtifact mArtifact) {
-            if (mArtifact instanceof MBuildTypeDependency) {
-                stack.pop();
-            }
-            return true;
-        }
-
-        private BuildTypeNode getGraphDependecy(BuildTypeId buildTypeId) {
-            if (graph.containsKey(buildTypeId))
-                return graph.get(buildTypeId);
+    private class Graph extends HashMap<BuildTypeId, BuildTypeNode> {
+        
+        private final Set<BuildTypeId> addedBuildTypes = newHashSet();
+        
+        public BuildTypeNode getGraphDependency(BuildTypeId buildTypeId) {
+            if (containsKey(buildTypeId))
+                return get(buildTypeId);
             else {
                 BuildTypeNode node = new BuildTypeNode(buildTypeId);
-                graph.put(buildTypeId, node);
+                put(buildTypeId, node);
                 return node;
             }
         }
+        
+        public void addBuildTypeDependencies(BuildTypeDependencies buildTypeDependencies) {
+            BuildTypeNode buildTypeNode = getGraphDependency(buildTypeDependencies.getBuildTypeId());
+            for (BuildTypeId childBuildTypeId: buildTypeDependencies.getDependencies()) {
+                BuildTypeNode childNode = getGraphDependency(childBuildTypeId);
+                buildTypeNode.addChild(childNode);
+            }
+            addedBuildTypes.add(buildTypeDependencies.getBuildTypeId());
+        }
+        
+        public Set<BuildTypeId> pendingAdditionBuildTypeIds() {
+            return new HashSet<BuildTypeId>(Sets.difference(keySet(), addedBuildTypes));
+        }
+        
     }
-
+    
     Joiner joiner = Joiner.on(", ");
 
     private class BuildTypeNode implements TopologicalSorter.Node<BuildTypeNode> {
@@ -191,6 +195,40 @@ public class BuildPlanAnalyzer {
 
         public String getDescriptionMessage() {
             return joiner.join(description);
+        }
+        
+        public String toString() {
+            StringBuilder sb = new StringBuilder()
+                    .append(buildTypeId.getProjectId()).append("/").append(buildTypeId.getBuildTypeId()).append(", ");
+            if (children.size() > 0) {
+                Iterable<String> childIds = Iterables.transform(children, new ExtractBuildTypeIdStringFunction());
+                sb.append("children:[");
+                joiner.appendTo(sb, childIds);
+                sb.append("], ");
+            }
+            if (parents.size() > 0) {
+                Iterable<String> parentIds = Iterables.transform(parents, new ExtractBuildTypeIdStringFunction());
+                sb.append("parents:[");
+                joiner.appendTo(sb, parentIds);
+                sb.append("], ");
+            }
+            if (needsBuild)
+                sb.append("needs build, ");
+            if (hasPendingChanges)
+                sb.append("has pending changes, ");
+            if (unknownBuildType)
+                sb.append("unknown build type, ");
+            sb.append("description:[");
+            joiner.appendTo(sb, description);
+            sb.append("]");
+            return sb.toString();
+                    
+        }
+
+        private class ExtractBuildTypeIdStringFunction implements Function<BuildTypeNode, String> {
+            public String apply(BuildTypeNode input) {
+                return input.buildTypeId.getProjectId() + "/" + input.buildTypeId.getBuildTypeId();
+            }
         }
     }
 }

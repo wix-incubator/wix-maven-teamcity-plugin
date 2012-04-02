@@ -20,10 +20,12 @@
     </bean>
     <bean id="executor" class="com.wixpress.ci.teamcity.mavenAnalyzer.CollectDependenciesExecutor" destroy-method="shutdown"/>
     <bean id="mavenDependenciesAnalyzer" class="com.wixpress.ci.teamcity.mavenAnalyzer.MavenBuildTypeDependenciesAnalyzer"/>
-    <bean class="com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypeDependenciesDecorator"/>
+    <bean id="buildTypeDependenciesDecorator" class="com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypeDependenciesDecorator"/>
     <bean class="com.wixpress.ci.teamcity.teamCityAnalyzer.BuildPlanAnalyzer">
         <constructor-arg ref="buildServer"/>
         <constructor-arg ref="configModel"/>
+        <constructor-arg ref="mavenDependenciesAnalyzer"/>
+        <constructor-arg ref="buildTypeDependenciesDecorator"/>
     </bean>
     <bean class="com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypesDependencyAnalyzer">
         <constructor-arg ref="mavenDependenciesAnalyzer"/>

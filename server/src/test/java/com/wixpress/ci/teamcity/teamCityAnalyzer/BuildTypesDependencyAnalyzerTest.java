@@ -3,6 +3,7 @@ package com.wixpress.ci.teamcity.teamCityAnalyzer;
 import com.google.common.collect.ImmutableList;
 import com.wixpress.ci.teamcity.domain.*;
 import com.wixpress.ci.teamcity.mavenAnalyzer.MavenBuildTypeDependenciesAnalyzer;
+import com.wixpress.ci.teamcity.mavenAnalyzer.dao.DependenciesDao;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SFinishedBuild;
@@ -25,12 +26,13 @@ import static org.mockito.Mockito.when;
 public class BuildTypesDependencyAnalyzerTest {
 
     private MavenBuildTypeDependenciesAnalyzer mavenBuildAnalyzer = mock(MavenBuildTypeDependenciesAnalyzer.class);
-    private ProjectManager projectManager = mock(ProjectManager.class);
     private BuildTypeDependenciesDecorator dependenciesDecorator = mock(BuildTypeDependenciesDecorator.class);
     private BuildPlanAnalyzer dependenciesSorter = mock(BuildPlanAnalyzer.class);
     private SBuildType buildType = mock(SBuildType.class);
+    private BuildTypeDependenciesExtractor dependenciesExtractor = mock(BuildTypeDependenciesExtractor.class);
+    private DependenciesDao dependenciesDao = mock(DependenciesDao.class);
 
-    private BuildTypesDependencyAnalyzer analyzer = new BuildTypesDependencyAnalyzer(mavenBuildAnalyzer, projectManager, dependenciesDecorator, dependenciesSorter);
+    private BuildTypesDependencyAnalyzer analyzer = new BuildTypesDependencyAnalyzer(mavenBuildAnalyzer, dependenciesDecorator, dependenciesSorter, dependenciesExtractor, dependenciesDao);
 
     @Test
     public void testGetBuildDependencies_Delegate() throws Exception {

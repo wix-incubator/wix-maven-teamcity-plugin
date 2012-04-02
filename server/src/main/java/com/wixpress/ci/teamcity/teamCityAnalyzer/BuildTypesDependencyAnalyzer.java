@@ -3,9 +3,11 @@ package com.wixpress.ci.teamcity.teamCityAnalyzer;
 import com.wixpress.ci.teamcity.DependenciesAnalyzer;
 import com.wixpress.ci.teamcity.domain.*;
 import com.wixpress.ci.teamcity.mavenAnalyzer.MavenBuildTypeDependenciesAnalyzer;
-import jetbrains.buildServer.serverSide.ProjectManager;
+import com.wixpress.ci.teamcity.mavenAnalyzer.dao.DependenciesDao;
+import com.wixpress.ci.teamcity.teamCityAnalyzer.entity.BuildTypeDependencies;
 import jetbrains.buildServer.serverSide.SBuildType;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -16,15 +18,21 @@ import java.util.List;
 public class BuildTypesDependencyAnalyzer implements DependenciesAnalyzer<BuildDependenciesResult>{
 
     private MavenBuildTypeDependenciesAnalyzer mavenBuildAnalyzer;
-    private ProjectManager projectManager;
     private BuildTypeDependenciesDecorator dependenciesDecorator;
-    private BuildPlanAnalyzer dependenciesSorter;
+    private BuildPlanAnalyzer buildPlanAnalyzer;
+    private BuildTypeDependenciesExtractor buildTypeDependenciesExtractor;
+    private DependenciesDao dependenciesDao;
 
-    public BuildTypesDependencyAnalyzer(MavenBuildTypeDependenciesAnalyzer mavenBuildAnalyzer, ProjectManager projectManager, BuildTypeDependenciesDecorator dependenciesDecorator, BuildPlanAnalyzer dependenciesSorter) {
+    public BuildTypesDependencyAnalyzer(MavenBuildTypeDependenciesAnalyzer mavenBuildAnalyzer,
+                                        BuildTypeDependenciesDecorator dependenciesDecorator,
+                                        BuildPlanAnalyzer buildPlanAnalyzer,
+                                        BuildTypeDependenciesExtractor buildTypeDependenciesExtractor,
+                                        DependenciesDao dependenciesDao) {
         this.mavenBuildAnalyzer = mavenBuildAnalyzer;
-        this.projectManager = projectManager;
         this.dependenciesDecorator = dependenciesDecorator;
-        this.dependenciesSorter = dependenciesSorter;
+        this.buildPlanAnalyzer = buildPlanAnalyzer;
+        this.buildTypeDependenciesExtractor = buildTypeDependenciesExtractor;
+        this.dependenciesDao = dependenciesDao;
     }
 
     public BuildDependenciesResult getBuildDependencies(SBuildType buildType) {
@@ -59,14 +67,22 @@ public class BuildTypesDependencyAnalyzer implements DependenciesAnalyzer<BuildD
     private BuildDependenciesResult analyzeBuildTypeDependencies(SBuildType buildType, MavenDependenciesResult mavenResult) {
         MavenDependenciesResult mavenDependenciesResult = dependenciesDecorator.decorateWithBuildTypesAnalysis(mavenResult, buildType);
         try {
-            List<MBuildPlanItem> buildPlan = dependenciesSorter.sortBuildTypes(mavenDependenciesResult.getModule(), new BuildTypeId(buildType));
+            BuildTypeDependencies buildTypeDependencies = getBuildTypeDependencies(mavenDependenciesResult.getModule(), buildType);
+            List<MBuildPlanItem> buildPlan = buildPlanAnalyzer.getBuildPlan(buildTypeDependencies);
             return new BuildDependenciesResult(mavenDependenciesResult, buildType, buildPlan);
         }
-        catch (IllegalStateException e) {
+        catch (Exception e) {
             BuildDependenciesResult buildDependenciesResult = new BuildDependenciesResult(mavenDependenciesResult, buildType);
             buildDependenciesResult.getFullTrace().add(new LogMessage("failed to sort build dependencies", LogMessageType.error, e));
             return buildDependenciesResult;
         }
+    }
+
+    private BuildTypeDependencies getBuildTypeDependencies(MModule module, SBuildType buildType) throws IOException {
+        BuildTypeId currentBuildId = new BuildTypeId(buildType);
+        BuildTypeDependencies buildTypeDependencies = buildTypeDependenciesExtractor.extract(module, currentBuildId);
+        dependenciesDao.saveBuildDependencies(buildTypeDependencies, buildType);
+        return buildTypeDependencies;
     }
 
     private BuildDependenciesResult toBuildDependenciesResult(MavenDependenciesResult mavenResult, SBuildType buildType) {

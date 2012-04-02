@@ -5,7 +5,7 @@ import com.wixpress.ci.teamcity.domain.*;
 import com.wixpress.ci.teamcity.maven.MavenBooter;
 import com.wixpress.ci.teamcity.maven.MavenProjectDependenciesAnalyzer;
 import com.wixpress.ci.teamcity.DependenciesAnalyzer;
-import com.wixpress.ci.teamcity.mavenAnalyzer.dao.BuildTypeDependenciesStorage;
+import com.wixpress.ci.teamcity.mavenAnalyzer.dao.ModuleDependenciesStorage;
 import com.wixpress.ci.teamcity.mavenAnalyzer.dao.DependenciesDao;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.vcs.VcsException;
@@ -117,7 +117,7 @@ public class MavenBuildTypeDependenciesAnalyzer implements DependenciesAnalyzer<
 
     private MavenDependenciesResult load(SBuildType buildType, boolean checkIfRefreshNeeded) {
         try {
-            BuildTypeDependenciesStorage dependenciesStorage = dependenciesDao.load(buildType);
+            ModuleDependenciesStorage dependenciesStorage = dependenciesDao.loadModuleDependencies(buildType);
             if (dependenciesStorage == null)
                 return new MavenDependenciesResult(ResultType.notRun);
             else if (dependenciesStorage.isException())
@@ -126,22 +126,20 @@ public class MavenBuildTypeDependenciesAnalyzer implements DependenciesAnalyzer<
                 return new MavenDependenciesResult(ResultType.needsRefresh, dependenciesStorage.getModule());
             else
                 return new MavenDependenciesResult(dependenciesStorage.getModule());
-        } catch (IOException e) {
-            return new MavenDependenciesResult(e);
         } catch (VcsException e) {
             return new MavenDependenciesResult(e);
         }
     }
 
     void save(MModule mModule, SBuildType buildType, CollectingMessagesListenerLogger listenerLogger) throws IOException, VcsException {
-        BuildTypeDependenciesStorage dependenciesStorage = new BuildTypeDependenciesStorage(mModule, getBuildVcsRevisions(buildType));
-        dependenciesDao.save(dependenciesStorage, buildType);
+        ModuleDependenciesStorage dependenciesStorage = new ModuleDependenciesStorage(mModule, getBuildVcsRevisions(buildType));
+        dependenciesDao.saveModuleDependencies(dependenciesStorage, buildType);
         listenerLogger.info("build dependencies saved");
     }
 
     void saveError(SBuildType buildType, CollectingMessagesListenerLogger listenerLogger) throws IOException {
-        BuildTypeDependenciesStorage dependenciesStorage = new BuildTypeDependenciesStorage(listenerLogger.getMessages());
-        dependenciesDao.save(dependenciesStorage, buildType);
+        ModuleDependenciesStorage dependenciesStorage = new ModuleDependenciesStorage(listenerLogger.getMessages());
+        dependenciesDao.saveModuleDependencies(dependenciesStorage, buildType);
         listenerLogger.info("build dependencies saved");
     }
 
