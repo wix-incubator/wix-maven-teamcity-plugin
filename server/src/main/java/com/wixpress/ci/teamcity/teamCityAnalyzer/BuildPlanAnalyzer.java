@@ -152,7 +152,7 @@ public class BuildPlanAnalyzer {
     
     Joiner joiner = Joiner.on(", ");
 
-    private class BuildTypeNode implements TopologicalSorter.Node<BuildTypeNode> {
+    private class BuildTypeNode implements Vertex<BuildTypeNode> {
         BuildTypeId buildTypeId;
         Set<BuildTypeNode> children = newHashSet();
         Set<BuildTypeNode> parents = newHashSet();

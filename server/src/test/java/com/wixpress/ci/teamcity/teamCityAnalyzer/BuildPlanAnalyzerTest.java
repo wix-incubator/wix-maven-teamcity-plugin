@@ -153,6 +153,23 @@ public class BuildPlanAnalyzerTest {
         assertThat(sorted, hasItem(IsMBuildPlanItem(is(newBuildTypeId("bt3")), false, any(String.class))));
     }
 
+    @Test
+    public void cyclingDependency() {
+        BuildTypeDependencies root = newBuildTypeDependencies("root", "bt1", "bt2");
+        BuildTypeDependencies bt1 = newBuildTypeDependencies("bt1", "bt2");
+        BuildTypeDependencies bt2 = newBuildTypeDependencies("bt2", "root");
+        mockBuild(root, false, d4);
+        mockBuild(bt1, false, d3);
+        mockBuild(bt2, false, d2);
+
+        List<MBuildPlanItem> sorted = sorter.getBuildPlan(root);
+
+        assertThat(sorted, hasItem(IsMBuildPlanItem(is(newBuildTypeId("root")), true, containsString("[proj-bt1:name-bt1] require building"))));
+        assertThat(sorted, hasItem(IsMBuildPlanItem(is(newBuildTypeId("bt1")), true, containsString("[proj-bt2:name-bt2] last build is newer"))));
+        assertThat(sorted, hasItem(IsMBuildPlanItem(is(newBuildTypeId("bt2")), false, any(String.class))));
+        assertThat(sorted, hasItem(IsMBuildPlanItem(is(newBuildTypeId("bt3")), false, any(String.class))));
+    }
+
     private void mockBuild(BuildTypeDependencies buildTypeDependencies, boolean hasPendingChanges, Date lastSuccessFullBuild) {
         SBuildType buildType = mock(SBuildType.class);
         SVcsModification vcsModification = mock(SVcsModification.class);

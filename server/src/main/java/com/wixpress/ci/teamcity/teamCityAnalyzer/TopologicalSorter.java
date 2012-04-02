@@ -12,41 +12,41 @@ import static com.google.common.collect.Maps.newHashMap;
  * @author yoav
  * @since 2/26/12
  */
-public class TopologicalSorter<NodeClass extends TopologicalSorter.Node<NodeClass>> {
-    private Node vertices[]; // list of vertices
+public class TopologicalSorter<VertexClass extends Vertex<VertexClass>> {
+    private Vertex vertices[]; // list of vertices
 
     private int edges[][]; // adjacency edges
 
     private int numVerts; // current number of vertices
 
-    private Node[] sortedArray;
+    private Vertex[] sortedArray;
 
     public TopologicalSorter(int size) {
-        vertices = new Node[size];
+        vertices = new Vertex[size];
         edges = new int[size][size];
-        sortedArray = new Node[size]; // sorted vert labels
+        sortedArray = new Vertex[size]; // sorted vert labels
     }
 
-    public TopologicalSorter(Collection<NodeClass> nodes) {
-        this(nodes.size());
+    public TopologicalSorter(Collection<VertexClass> vertices) {
+        this(vertices.size());
 
-        Map<NodeClass, Integer> indexes = newHashMap();
+        Map<VertexClass, Integer> indexes = newHashMap();
 
         // add vertices
-        for (NodeClass node : nodes) {
-            indexes.put(node, addVertex(node));
+        for (VertexClass vertex : vertices) {
+            indexes.put(vertex, addVertex(vertex));
         }
 
         // add edges
-        for (NodeClass node: nodes) {
-            for (NodeClass nodeOutgoingEdges: node.getChildren()) {
-                if (indexes.containsKey(nodeOutgoingEdges))
-                    addEdge(indexes.get(node), indexes.get(nodeOutgoingEdges));
+        for (VertexClass vertex : vertices) {
+            for (VertexClass vertexOutgoingEdges : vertex.getChildren()) {
+                if (indexes.containsKey(vertexOutgoingEdges))
+                    addEdge(indexes.get(vertex), indexes.get(vertexOutgoingEdges));
             }
         }
     }
 
-    public int addVertex(NodeClass buildTypeId) {
+    public int addVertex(VertexClass buildTypeId) {
         vertices[numVerts] = buildTypeId;
         return numVerts++;
     }
@@ -55,7 +55,7 @@ public class TopologicalSorter<NodeClass extends TopologicalSorter.Node<NodeClas
         edges[start][end] = 1;
     }
 
-    public List<NodeClass> sort() // toplogical sort
+    public List<VertexClass> sort() // toplogical sort
     {
         while (numVerts > 0) // while vertices remain,
         {
@@ -71,10 +71,10 @@ public class TopologicalSorter<NodeClass extends TopologicalSorter.Node<NodeClas
             deleteVertex(currentVertex); // delete vertex
         }
 
-        ArrayList<NodeClass> result = newArrayList();
-        for (Node node: sortedArray)
+        ArrayList<VertexClass> result = newArrayList();
+        for (Vertex vertex : sortedArray)
             //noinspection unchecked
-            result.add((NodeClass) node);
+            result.add((VertexClass) vertex);
         return result;
     }
 
@@ -118,13 +118,6 @@ public class TopologicalSorter<NodeClass extends TopologicalSorter.Node<NodeClas
     private void moveColLeft(int col, int length) {
         for (int row = 0; row < length; row++)
             edges[row][col] = edges[row][col + 1];
-    }
-
-    public interface Node<NodeClass extends Node> {
-        public int hashCode();
-        public boolean equals(Object other);
-
-        Iterable<NodeClass> getChildren();
     }
 
 }
