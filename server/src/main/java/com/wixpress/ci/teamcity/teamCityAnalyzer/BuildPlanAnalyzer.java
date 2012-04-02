@@ -7,6 +7,9 @@ import com.google.common.collect.Sets;
 import com.wixpress.ci.teamcity.dependenciesTab.ConfigModel;
 import com.wixpress.ci.teamcity.domain.*;
 import com.wixpress.ci.teamcity.mavenAnalyzer.dao.DependenciesDao;
+import com.wixpress.ci.teamcity.teamCityAnalyzer.algorithms.CycleSolvingTopologicalSorter;
+import com.wixpress.ci.teamcity.teamCityAnalyzer.algorithms.IgnoreEdgesCapable;
+import com.wixpress.ci.teamcity.teamCityAnalyzer.algorithms.Vertex;
 import com.wixpress.ci.teamcity.teamCityAnalyzer.entity.BuildTypeDependencies;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -41,7 +44,7 @@ public class BuildPlanAnalyzer {
         markNodesPendingChangesAndLastBuild(graph);
         markNodesNeedingRebuild(graph);
         markNodesNeedingRebuildingByDependencies(graph);        
-        TopologicalSorter<BuildTypeNode> topologicalSorter = new TopologicalSorter<BuildTypeNode>(graph.values());
+        CycleSolvingTopologicalSorter<BuildTypeNode> topologicalSorter = new CycleSolvingTopologicalSorter<BuildTypeNode>(graph.values());
         List<BuildTypeNode> sortedNodes = topologicalSorter.sort();
         return transform(sortedNodes, new Function<BuildTypeNode, MBuildPlanItem>() {
             public MBuildPlanItem apply(BuildTypeNode input) {
@@ -152,10 +155,11 @@ public class BuildPlanAnalyzer {
     
     Joiner joiner = Joiner.on(", ");
 
-    private class BuildTypeNode implements Vertex<BuildTypeNode> {
+    private class BuildTypeNode implements Vertex<BuildTypeNode>, IgnoreEdgesCapable<BuildTypeNode> {
         BuildTypeId buildTypeId;
         Set<BuildTypeNode> children = newHashSet();
         Set<BuildTypeNode> parents = newHashSet();
+        Set<BuildTypeNode> ignoredEdges = newHashSet();
         boolean needsBuild = false;
         List<String> description = newArrayList();
         Date latestBuildStart;
@@ -173,7 +177,12 @@ public class BuildPlanAnalyzer {
         }
 
         public Iterable<BuildTypeNode> getChildren() {
-            return children;
+            return Sets.difference(children, ignoredEdges);
+        }
+
+        public void ignoreEdgeTo(BuildTypeNode buildTypeNode) {
+            ignoredEdges.add(buildTypeNode);
+            description.add("CYCLIC DEPENDENCY DETECTED to build configuration " + buildTypeNode.buildTypeId);
         }
 
         public void markNeedsBuild(String description) {
@@ -190,12 +199,12 @@ public class BuildPlanAnalyzer {
 
         public void analyzeParentDependencies() {
             for (BuildTypeNode parent: parents) {
-                if (parent.latestBuildStart != null && this.latestBuildFinished != null && 
+                if (parent.latestBuildStart != null && this.latestBuildFinished != null &&
                         (this.latestBuildFinished.compareTo(parent.latestBuildStart) > 0))
-                    parent.markNeedsBuild(String.format("[%s:%s] last build is newer", 
+                    parent.markNeedsBuild(String.format("[%s:%s] last build is newer",
                             this.buildTypeId.getProjectName(), this.buildTypeId.getName()));
                 if (needsBuild)
-                    parent.markNeedsBuild(String.format("[%s:%s] require building", 
+                    parent.markNeedsBuild(String.format("[%s:%s] require building",
                             this.buildTypeId.getProjectName(), this.buildTypeId.getName()));
             }
         }
@@ -203,7 +212,7 @@ public class BuildPlanAnalyzer {
         public String getDescriptionMessage() {
             return joiner.join(description);
         }
-        
+
         public String toString() {
             StringBuilder sb = new StringBuilder()
                     .append(buildTypeId.getProjectId()).append("/").append(buildTypeId.getBuildTypeId()).append(", ");
@@ -229,7 +238,7 @@ public class BuildPlanAnalyzer {
             joiner.appendTo(sb, description);
             sb.append("]");
             return sb.toString();
-                    
+
         }
 
         private class ExtractBuildTypeIdStringFunction implements Function<BuildTypeNode, String> {

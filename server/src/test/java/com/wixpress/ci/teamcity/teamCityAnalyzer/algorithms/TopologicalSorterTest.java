@@ -1,7 +1,6 @@
-package com.wixpress.ci.teamcity.teamCityAnalyzer;
+package com.wixpress.ci.teamcity.teamCityAnalyzer.algorithms;
 
 import com.google.common.collect.ImmutableList;
-import com.wixpress.ci.teamcity.domain.BuildTypeId;
 import org.junit.Test;
 
 import java.util.List;

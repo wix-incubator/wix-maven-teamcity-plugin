@@ -1,4 +1,4 @@
-package com.wixpress.ci.teamcity.teamCityAnalyzer;
+package com.wixpress.ci.teamcity.teamCityAnalyzer.algorithms;
 
 import java.util.*;
 
@@ -17,15 +17,15 @@ public class TarganSCCsAlgorithm<VertexClass extends Vertex<VertexClass>> {
     private Collection<VertexClass> vertices;
     private int index = 0;
     private Deque<VertexClass> stack = newLinkedList();
-    private Map<VertexClass, IndexOf> indexes = newHashMap();
-    private Map<VertexClass, IndexOf> lowLinks = newHashMap();
+    private Map<VertexClass, OptionalInteger> indexes = newHashMap();
+    private Map<VertexClass, OptionalInteger> lowLinks = newHashMap();
     private Set<Set<VertexClass>> stronglyConnectedComponents = newHashSet();
 
     public TarganSCCsAlgorithm(Collection<VertexClass> vertices) {
         this.vertices = vertices;
         for (VertexClass vertex: vertices) {
-            indexes.put(vertex, new IndexOf());
-            lowLinks.put(vertex, new IndexOf());
+            indexes.put(vertex, new OptionalInteger());
+            lowLinks.put(vertex, new OptionalInteger());
         }
     }
     
@@ -80,15 +80,19 @@ public class TarganSCCsAlgorithm<VertexClass extends Vertex<VertexClass>> {
         }
     }
 
-    private IndexOf indexOf(VertexClass vertex) {
+    private OptionalInteger indexOf(VertexClass vertex) {
+        if (!indexes.containsKey(vertex))
+            indexes.put(vertex, new OptionalInteger());
         return indexes.get(vertex);
     }
 
-    private IndexOf lowLinksOf(VertexClass vertex) {
+    private OptionalInteger lowLinksOf(VertexClass vertex) {
+        if (!lowLinks.containsKey(vertex))
+            lowLinks.put(vertex, new OptionalInteger());
         return lowLinks.get(vertex);
     }
 
-    private class IndexOf {
+    private class OptionalInteger {
         
         private boolean defined = false;
         private Integer index = null;

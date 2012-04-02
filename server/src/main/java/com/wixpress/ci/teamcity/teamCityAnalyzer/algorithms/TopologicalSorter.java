@@ -1,4 +1,4 @@
-package com.wixpress.ci.teamcity.teamCityAnalyzer;
+package com.wixpress.ci.teamcity.teamCityAnalyzer.algorithms;
 
 import java.util.ArrayList;
 import java.util.Collection;

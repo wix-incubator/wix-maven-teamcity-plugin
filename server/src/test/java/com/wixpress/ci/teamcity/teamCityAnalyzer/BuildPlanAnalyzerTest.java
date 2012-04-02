@@ -10,6 +10,7 @@ import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SFinishedBuild;
 import jetbrains.buildServer.vcs.SVcsModification;
 import org.hamcrest.Matcher;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,9 +36,14 @@ public class BuildPlanAnalyzerTest {
     private DependenciesDao dependenciesDao = mock(DependenciesDao.class);
 
     BuildPlanAnalyzer sorter = new BuildPlanAnalyzer(projectManager, configModel, dependenciesDao);
+
+    @SuppressWarnings("deprecation")
     Date d1 = new Date(2011, 1, 1, 1, 1);
+    @SuppressWarnings("deprecation")
     Date d2 = new Date(2011, 1, 1, 1, 2);
+    @SuppressWarnings("deprecation")
     Date d3 = new Date(2011, 1, 1, 1, 3);
+    @SuppressWarnings("deprecation")
     Date d4 = new Date(2011, 1, 1, 1, 4);
 
     @Before
@@ -77,7 +83,7 @@ public class BuildPlanAnalyzerTest {
     }
     
     @Test
-    public void dependentBuildNevenBuilt() {
+    public void dependentBuildNeverBuilt() {
         BuildTypeDependencies root = newBuildTypeDependencies("root", "bt1", "bt3");
         BuildTypeDependencies bt1 = newBuildTypeDependencies("bt1", "bt2", "bt3");
         BuildTypeDependencies bt2 = newBuildTypeDependencies("bt2");
@@ -157,20 +163,19 @@ public class BuildPlanAnalyzerTest {
     public void cyclingDependency() {
         BuildTypeDependencies root = newBuildTypeDependencies("root", "bt1", "bt2");
         BuildTypeDependencies bt1 = newBuildTypeDependencies("bt1", "bt2");
-        BuildTypeDependencies bt2 = newBuildTypeDependencies("bt2", "root");
+        BuildTypeDependencies bt2 = newBuildTypeDependencies("bt2", "bt3");
+        BuildTypeDependencies bt3 = newBuildTypeDependencies("bt3", "bt1");
         mockBuild(root, false, d4);
         mockBuild(bt1, false, d3);
         mockBuild(bt2, false, d2);
+        mockBuild(bt3, false, d1);
 
         List<MBuildPlanItem> sorted = sorter.getBuildPlan(root);
 
-        assertThat(sorted, hasItem(IsMBuildPlanItem(is(newBuildTypeId("root")), true, containsString("[proj-bt1:name-bt1] require building"))));
-        assertThat(sorted, hasItem(IsMBuildPlanItem(is(newBuildTypeId("bt1")), true, containsString("[proj-bt2:name-bt2] last build is newer"))));
-        assertThat(sorted, hasItem(IsMBuildPlanItem(is(newBuildTypeId("bt2")), false, any(String.class))));
-        assertThat(sorted, hasItem(IsMBuildPlanItem(is(newBuildTypeId("bt3")), false, any(String.class))));
+        assertThat(sorted.size(), is(4));
     }
 
-    private void mockBuild(BuildTypeDependencies buildTypeDependencies, boolean hasPendingChanges, Date lastSuccessFullBuild) {
+    private void mockBuild(BuildTypeDependencies buildTypeDependencies, boolean hasPendingChanges, @Nullable Date lastSuccessFullBuild) {
         SBuildType buildType = mock(SBuildType.class);
         SVcsModification vcsModification = mock(SVcsModification.class);
         when(vcsModification.getDescription()).thenReturn("pending change");
