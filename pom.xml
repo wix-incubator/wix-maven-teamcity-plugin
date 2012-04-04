@@ -4,7 +4,7 @@
 
     <groupId>com.wixpress.ci.teamcity</groupId>
     <artifactId>maven-teamcity-plugin</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>teamcity maven dependencies plugin</name>
