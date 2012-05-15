@@ -63,7 +63,7 @@
         <dependencies>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>server</artifactId>
+                <artifactId>maven-teamcity-plugin-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

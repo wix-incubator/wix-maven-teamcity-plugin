@@ -9,14 +9,14 @@
     </parent>
 
     <groupId>com.wixpress.ci.teamcity</groupId>
-    <artifactId>distribution</artifactId>
+    <artifactId>maven-teamcity-plugin-distribution</artifactId>
     <version>1.3-SNAPSHOT</version>
     <name>teamcity maven dependencies plugin distribution</name>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>server</artifactId>
+            <artifactId>maven-teamcity-plugin-server</artifactId>
         </dependency>
     </dependencies>
 
