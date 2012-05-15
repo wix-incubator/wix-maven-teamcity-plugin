@@ -1,8 +1,7 @@
 package com.wixpress.ci.teamcity.domain;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
 
-import java.util.Date;
+import java.util.List;
 
 /**
  * @author yoav
@@ -12,7 +11,10 @@ public class MBuildPlanItem {
 
     private BuildTypeId buildTypeId = new BuildTypeId();
     private boolean needsBuild;
+    private boolean newerThenChild;
     private String description;
+    private boolean hasPendingChanges;
+    private List<MBuildPlanItem> children;
 
     public MBuildPlanItem() {
     }
@@ -60,5 +62,29 @@ public class MBuildPlanItem {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public List<MBuildPlanItem> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<MBuildPlanItem> children) {
+        this.children = children;
+    }
+
+    public boolean isHasPendingChanges() {
+        return hasPendingChanges;
+    }
+
+    public void setHasPendingChanges(boolean hasPendingChanges) {
+        this.hasPendingChanges = hasPendingChanges;
+    }
+
+    public boolean isNewerThenChild() {
+        return newerThenChild;
+    }
+
+    public void setNewerThenChild(boolean newerThenChild) {
+        this.newerThenChild = newerThenChild;
     }
 }

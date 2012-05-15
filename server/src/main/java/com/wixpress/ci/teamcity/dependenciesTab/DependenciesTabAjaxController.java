@@ -2,6 +2,7 @@ package com.wixpress.ci.teamcity.dependenciesTab;
 
 import com.google.common.collect.Lists;
 import com.wixpress.ci.teamcity.DependenciesAnalyzer;
+import com.wixpress.ci.teamcity.domain.BuildDependenciesResult;
 import com.wixpress.ci.teamcity.domain.DependenciesTabConfig;
 import com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypesDependencyAnalyzer;
 import jetbrains.buildServer.controllers.BaseController;
@@ -15,7 +16,6 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +47,7 @@ public class DependenciesTabAjaxController extends BaseController {
         registerProgressOperation();
         registerForceAnalyzeDependencies();
         registerGetBuildDependencies();
+        registerGetBuildPlan();
         registerSaveConfig();
     }
 
@@ -77,6 +78,23 @@ public class DependenciesTabAjaxController extends BaseController {
                 return null;
             }
         });
+    }
+
+    private void registerGetBuildPlan(){
+        actions.put("getBuildPlan", new Action() {
+            @Override
+            Object doHandle(HttpServletRequest request) throws IOException {
+                String id = getParameter(request, "id");
+                SBuildType buildType = projectManager.findBuildTypeById(id);
+                if (buildType != null){
+                    BuildDependenciesResult buildDependenciesResult = (BuildDependenciesResult) dependenciesAnalyzer.getBuildDependencies(buildType, true);
+                    return buildDependenciesResult.getBuildPlan();
+                }
+                else
+                    throw new ResourceNotFoundException("build [%s] not found", id);
+            }
+        });
+
     }
 
     private void registerGetBuildDependencies() {

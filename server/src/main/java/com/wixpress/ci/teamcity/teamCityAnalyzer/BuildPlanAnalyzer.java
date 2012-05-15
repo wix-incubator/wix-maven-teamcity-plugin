@@ -26,13 +26,13 @@ import static com.google.common.collect.Sets.newHashSet;
  * @since 2/26/12
  */
 public class BuildPlanAnalyzer {
-    
+
     private ProjectManager projectManager;
     private ConfigModel configModel;
     private DependenciesDao dependenciesDao;
 
     private SimplePatternMatcher patternMatcher = new SimplePatternMatcher();
-    
+
     public BuildPlanAnalyzer(ProjectManager projectManager, ConfigModel configModel, DependenciesDao dependenciesDao) {
         this.projectManager = projectManager;
         this.configModel = configModel;
@@ -43,17 +43,10 @@ public class BuildPlanAnalyzer {
         Graph graph = buildGraph(buildTypeDependencies);
         markNodesPendingChangesAndLastBuild(graph);
         markNodesNeedingRebuild(graph);
-        markNodesNeedingRebuildingByDependencies(graph);        
+        markNodesNeedingRebuildingByDependencies(graph);
         CycleSolvingTopologicalSorter<BuildTypeNode> topologicalSorter = new CycleSolvingTopologicalSorter<BuildTypeNode>(graph.values());
         List<BuildTypeNode> sortedNodes = topologicalSorter.sort();
-        return transform(sortedNodes, new Function<BuildTypeNode, MBuildPlanItem>() {
-            public MBuildPlanItem apply(BuildTypeNode input) {
-                MBuildPlanItem mBuildPlanItem = new MBuildPlanItem(input.buildTypeId);
-                if (input.needsBuild)
-                    mBuildPlanItem.needsBuild(input.getDescriptionMessage());
-                return mBuildPlanItem;
-            }
-        });
+        return transform(sortedNodes, new Transform());
     }
 
     private void markNodesNeedingRebuildingByDependencies(Graph graph) {
@@ -64,9 +57,9 @@ public class BuildPlanAnalyzer {
 
     private void markNodesNeedingRebuild(Graph graph) {
         for (BuildTypeNode buildTypeNode: graph.values()) {
-            if (buildTypeNode.latestBuildStart == null) 
+            if (buildTypeNode.latestBuildStart == null)
                 buildTypeNode.markNeedsBuild("No successful build found");
-            else if (buildTypeNode.hasPendingChanges) 
+            else if (buildTypeNode.hasPendingChanges)
                 buildTypeNode.markNeedsBuild("Has pending changes");
         }
     }
@@ -122,9 +115,9 @@ public class BuildPlanAnalyzer {
     }
 
     private class Graph extends HashMap<BuildTypeId, BuildTypeNode> {
-        
+
         private final Set<BuildTypeId> addedBuildTypes = newHashSet();
-        
+
         public BuildTypeNode getGraphDependency(BuildTypeId buildTypeId) {
             if (containsKey(buildTypeId))
                 return get(buildTypeId);
@@ -134,7 +127,7 @@ public class BuildPlanAnalyzer {
                 return node;
             }
         }
-        
+
         public void addBuildTypeDependencies(BuildTypeDependencies buildTypeDependencies) {
             BuildTypeNode buildTypeNode = getGraphDependency(buildTypeDependencies.getBuildTypeId());
             for (BuildTypeId childBuildTypeId: buildTypeDependencies.getDependencies()) {
@@ -143,7 +136,7 @@ public class BuildPlanAnalyzer {
             }
             addedBuildTypes.add(buildTypeDependencies.getBuildTypeId());
         }
-        
+
         public Set<BuildTypeId> pendingAdditionBuildTypeIds() {
             return new HashSet<BuildTypeId>(Sets.difference(keySet(), addedBuildTypes));
         }
@@ -152,7 +145,7 @@ public class BuildPlanAnalyzer {
             addedBuildTypes.add(buildTypeId);
         }
     }
-    
+
     Joiner joiner = Joiner.on(", ");
 
     private class BuildTypeNode implements Vertex<BuildTypeNode>, IgnoreEdgesCapable<BuildTypeNode> {
@@ -162,6 +155,7 @@ public class BuildPlanAnalyzer {
         Set<BuildTypeNode> ignoredEdges = newHashSet();
         boolean needsBuild = false;
         List<String> description = newArrayList();
+        boolean newerThenChild = false;
         Date latestBuildStart;
         Date latestBuildFinished;
         boolean hasPendingChanges;
@@ -176,8 +170,9 @@ public class BuildPlanAnalyzer {
             child.parents.add(this);
         }
 
-        public Iterable<BuildTypeNode> getChildren() {
-            return Sets.difference(children, ignoredEdges);
+        public List<BuildTypeNode> getChildren() {
+            Set<BuildTypeNode> data = Sets.difference(children, ignoredEdges);
+            return new ArrayList(data);
         }
 
         public void ignoreEdgeTo(BuildTypeNode buildTypeNode) {
@@ -200,9 +195,11 @@ public class BuildPlanAnalyzer {
         public void analyzeParentDependencies() {
             for (BuildTypeNode parent: parents) {
                 if (parent.latestBuildStart != null && this.latestBuildFinished != null &&
-                        (this.latestBuildFinished.compareTo(parent.latestBuildStart) > 0))
+                        (this.latestBuildFinished.compareTo(parent.latestBuildStart) > 0)){
+                    parent.newerThenChild = true;
                     parent.markNeedsBuild(String.format("[%s:%s] last build is newer",
                             this.buildTypeId.getProjectName(), this.buildTypeId.getName()));
+                }
                 if (needsBuild)
                     parent.markNeedsBuild(String.format("[%s:%s] require building",
                             this.buildTypeId.getProjectName(), this.buildTypeId.getName()));
@@ -245,6 +242,20 @@ public class BuildPlanAnalyzer {
             public String apply(BuildTypeNode input) {
                 return input.buildTypeId.getProjectId() + "/" + input.buildTypeId.getBuildTypeId();
             }
+        }
+    }
+
+    class Transform implements Function<BuildTypeNode, MBuildPlanItem> {
+        public MBuildPlanItem apply(BuildTypeNode input) {
+            MBuildPlanItem mBuildPlanItem = new MBuildPlanItem(input.buildTypeId);
+            mBuildPlanItem.setHasPendingChanges(input.hasPendingChanges);
+            mBuildPlanItem.setNewerThenChild(input.newerThenChild);
+            if (input.needsBuild)
+                mBuildPlanItem.needsBuild(input.getDescriptionMessage());
+            if (input.getChildren().iterator().hasNext()){
+                mBuildPlanItem.setChildren(transform(input.getChildren(), new Transform()));
+            }
+            return mBuildPlanItem;
         }
     }
 }
