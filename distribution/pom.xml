@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.wixpress.ci.teamcity</groupId>
         <artifactId>maven-teamcity-plugin</artifactId>
-        <version>1.2</version>
+        <version>1.3-SNAPSHOT</version>
     </parent>
 
     <groupId>com.wixpress.ci.teamcity</groupId>
     <artifactId>distribution</artifactId>
-    <version>1.2</version>
+    <version>1.3-SNAPSHOT</version>
     <name>teamcity maven dependencies plugin distribution</name>
 
     <dependencies>
