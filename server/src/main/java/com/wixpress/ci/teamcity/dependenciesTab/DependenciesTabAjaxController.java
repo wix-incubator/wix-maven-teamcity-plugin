@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.wixpress.ci.teamcity.DependenciesAnalyzer;
 import com.wixpress.ci.teamcity.domain.BuildDependenciesResult;
 import com.wixpress.ci.teamcity.domain.DependenciesTabConfig;
+import com.wixpress.ci.teamcity.domain.MBuildPlan;
 import com.wixpress.ci.teamcity.teamCityAnalyzer.BuildTypesDependencyAnalyzer;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.serverSide.ProjectManager;
@@ -88,7 +89,7 @@ public class DependenciesTabAjaxController extends BaseController {
                 SBuildType buildType = projectManager.findBuildTypeById(id);
                 if (buildType != null){
                     BuildDependenciesResult buildDependenciesResult = (BuildDependenciesResult) dependenciesAnalyzer.getBuildDependencies(buildType, true);
-                    return buildDependenciesResult.getBuildPlan();
+                    return new MBuildPlan(buildDependenciesResult.getBuildPlan());
                 }
                 else
                     throw new ResourceNotFoundException("build [%s] not found", id);
