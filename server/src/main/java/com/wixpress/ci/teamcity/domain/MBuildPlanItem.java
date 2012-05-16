@@ -11,7 +11,7 @@ public class MBuildPlanItem {
 
     private BuildTypeId buildTypeId = new BuildTypeId();
     private boolean needsBuild;
-    private boolean newerThenChild;
+    private boolean newerThenParent;
     private String description;
     private boolean hasPendingChanges;
     private List<MBuildPlanItem> children;
@@ -80,11 +80,11 @@ public class MBuildPlanItem {
         this.hasPendingChanges = hasPendingChanges;
     }
 
-    public boolean isNewerThenChild() {
-        return newerThenChild;
+    public boolean isNewerThenParent() {
+        return newerThenParent;
     }
 
-    public void setNewerThenChild(boolean newerThenChild) {
-        this.newerThenChild = newerThenChild;
+    public void setNewerThenParent(boolean newerThenParent) {
+        this.newerThenParent = newerThenParent;
     }
 }
