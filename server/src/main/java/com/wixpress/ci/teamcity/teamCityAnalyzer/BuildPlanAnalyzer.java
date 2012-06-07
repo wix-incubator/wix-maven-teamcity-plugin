@@ -155,7 +155,7 @@ public class BuildPlanAnalyzer {
         Set<BuildTypeNode> ignoredEdges = newHashSet();
         boolean needsBuild = false;
         List<String> description = newArrayList();
-        boolean newerThenParent = false;
+        List<String> newerChildren = newArrayList();
         Date latestBuildStart;
         Date latestBuildFinished;
         boolean hasPendingChanges;
@@ -196,7 +196,7 @@ public class BuildPlanAnalyzer {
             for (BuildTypeNode parent: parents) {
                 if (parent.latestBuildStart != null && this.latestBuildFinished != null &&
                         (this.latestBuildFinished.compareTo(parent.latestBuildStart) > 0)){
-                    this.newerThenParent = true;
+                    parent.newerChildren.add(this.buildTypeId.getBuildTypeId());
                     parent.markNeedsBuild(String.format("[%s:%s] last build is newer",
                             this.buildTypeId.getProjectName(), this.buildTypeId.getName()));
                 }
@@ -250,7 +250,7 @@ public class BuildPlanAnalyzer {
             MBuildPlanItem mBuildPlanItem = new MBuildPlanItem(input.buildTypeId);
             mBuildPlanItem.setHasPendingChanges(input.hasPendingChanges);
 
-            mBuildPlanItem.setNewerThenParent(input.newerThenParent);
+            mBuildPlanItem.setNewerChildren(input.newerChildren);
             if (input.needsBuild)
                 mBuildPlanItem.needsBuild(input.getDescriptionMessage());
             if (input.getChildren().iterator().hasNext()){

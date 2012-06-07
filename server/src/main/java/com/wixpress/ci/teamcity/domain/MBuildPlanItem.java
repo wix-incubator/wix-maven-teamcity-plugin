@@ -1,6 +1,7 @@
 package com.wixpress.ci.teamcity.domain;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,7 +12,7 @@ public class MBuildPlanItem {
 
     private BuildTypeId buildTypeId = new BuildTypeId();
     private boolean needsBuild;
-    private boolean newerThenParent;
+    private List<String> newerChildren;
     private String description;
     private boolean hasPendingChanges;
     private List<MBuildPlanItem> children;
@@ -80,11 +81,11 @@ public class MBuildPlanItem {
         this.hasPendingChanges = hasPendingChanges;
     }
 
-    public boolean isNewerThenParent() {
-        return newerThenParent;
+    public List<String> getNewerChildren() {
+        return newerChildren;
     }
 
-    public void setNewerThenParent(boolean newerThenParent) {
-        this.newerThenParent = newerThenParent;
+    public void setNewerChildren(List<String> newerChildren) {
+        this.newerChildren = newerChildren;
     }
 }
